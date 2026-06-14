@@ -3,11 +3,13 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Star, Quote } from 'lucide-react';
-import { TESTIMONIALS } from './data';
 import { SectionHeading } from './ui/SectionHeading';
 import { GlassCard } from './ui/GlassCard';
 
-export function Testimonials() {
+export function Testimonials({ data }: { data?: any[] }) {
+  const testimonials = (data || []).filter((t: any) => t.status !== 'archived');
+  if (testimonials.length === 0) return null;
+
   return (
     <section className="py-24 relative overflow-hidden">
       <div className="container mx-auto px-6 md:px-12">
@@ -30,16 +32,16 @@ export function Testimonials() {
             style={{ width: 'max-content' }}
           >
             {/* Double the items to create seamless loop */}
-            {[...TESTIMONIALS, ...TESTIMONIALS].map((testimonial, idx) => (
+            {[...testimonials, ...testimonials].map((testimonial: any, idx: number) => (
               <GlassCard
-                key={`${testimonial.id}-${idx}`}
+                key={`${testimonial._id}-${idx}`}
                 className="w-[350px] md:w-[450px] p-8 shrink-0 relative"
                 hoverEffect
               >
                 <Quote className="absolute top-6 right-6 text-white/5 w-16 h-16" />
 
                 <div className="flex gap-1 mb-6">
-                  {Array.from({ length: testimonial.rating }).map((_, i) => (
+                  {Array.from({ length: testimonial.rating || 5 }).map((_, i) => (
                     <Star
                       key={i}
                       size={16}
@@ -49,21 +51,25 @@ export function Testimonials() {
                 </div>
 
                 <p className="text-white/80 text-lg leading-relaxed mb-8 relative z-10">
-                  &ldquo;{testimonial.text}&rdquo;
+                  &ldquo;{testimonial.text || testimonial.content}&rdquo;
                 </p>
 
                 <div className="flex items-center gap-4">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={testimonial.image}
-                    alt={testimonial.name}
-                    className="w-12 h-12 rounded-full object-cover border border-white/10"
-                  />
+                  {testimonial.thumbnail || testimonial.image ? (
+                    <img
+                      src={testimonial.thumbnail || testimonial.image}
+                      alt={testimonial.name}
+                      className="w-12 h-12 rounded-full object-cover border border-white/10"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-xs text-white/50">Img</div>
+                  )}
                   <div>
                     <h4 className="text-white font-bold font-display">
                       {testimonial.name}
                     </h4>
-                    <p className="text-white/50 text-sm">{testimonial.role}</p>
+                    <p className="text-white/50 text-sm">{testimonial.role || testimonial.position}</p>
                   </div>
                 </div>
               </GlassCard>

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
-import { PERSONA } from './data';
+
 import { twMerge } from 'tailwind-merge';
 
 const NAV_LINKS = [
@@ -73,9 +73,9 @@ export function Navigation() {
             className="text-xl font-display font-bold tracking-tighter flex items-center gap-2 group"
           >
             <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-neon-blue to-neon-purple flex items-center justify-center text-white shadow-[0_0_15px_rgba(59,130,246,0.5)] group-hover:shadow-[0_0_25px_rgba(168,85,247,0.6)] transition-shadow">
-              {PERSONA.name.charAt(0)}
+              N
             </span>
-            <span className="hidden sm:block">{PERSONA.name}</span>
+            <span className="hidden sm:block">Nadiya</span>
           </a>
 
           {/* Desktop Nav */}

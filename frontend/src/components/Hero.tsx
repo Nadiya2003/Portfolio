@@ -3,11 +3,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Download, Mail } from 'lucide-react';
-import { PERSONA } from './data';
 import { MagneticButton } from './ui/MagneticButton';
 import { GlassCard } from './ui/GlassCard';
 
-export function Hero() {
+export function Hero({ data }: { data?: any }) {
   const scrollToSection = (id: string) => {
     const element = document.querySelector(id);
     if (element) {
@@ -16,6 +15,8 @@ export function Hero() {
       window.scrollTo({ top: offsetTop, behavior: 'smooth' });
     }
   };
+
+  const hasImage = Boolean(data?.heroImage);
 
   return (
     <section
@@ -42,97 +43,122 @@ export function Hero() {
       </div>
 
       <div className="container mx-auto px-6 md:px-12 relative z-10">
-        <div className="max-w-4xl">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-panel border-neon-purple/30 mb-8">
-              <span className="w-2 h-2 rounded-full bg-neon-purple animate-pulse shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
-              <span className="text-sm font-medium text-white/80">
-                Available for new projects
+        <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
+          <div className={`max-w-4xl ${hasImage ? 'lg:w-3/5' : 'w-full'}`}>
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-panel border-neon-purple/30 mb-8">
+                <span className="w-2 h-2 rounded-full bg-neon-purple animate-pulse shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
+                <span className="text-sm font-medium text-white/80">
+                  Available for new projects
+                </span>
+              </div>
+            </motion.div>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="text-5xl md:text-7xl lg:text-8xl font-display font-bold leading-[1.1] tracking-tight mb-6"
+            >
+              {data?.title || 'Designing Experiences.'} <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-blue via-neon-cyan to-white">
+                {data?.subtitle || 'Building Digital Excellence.'}
               </span>
-            </div>
-          </motion.div>
+            </motion.h1>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="text-5xl md:text-7xl lg:text-8xl font-display font-bold leading-[1.1] tracking-tight mb-6"
-          >
-            Designing{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-blue via-neon-cyan to-white">
-              Experiences.
-            </span>
-            <br />
-            Building Digital{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-purple to-white">
-              Excellence.
-            </span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-lg md:text-xl text-white/60 max-w-2xl mb-10 leading-relaxed"
-          >
-            {PERSONA.subheading}
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-            className="flex flex-wrap items-center gap-4"
-          >
-            <MagneticButton
-              color="blue"
-              onClick={() => scrollToSection('#portfolio')}
+            <motion.p
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="text-lg md:text-xl text-white/60 max-w-2xl mb-10 leading-relaxed"
             >
-              View Portfolio <ArrowRight size={18} />
-            </MagneticButton>
+              {data?.bio || "I bridge the gap between aesthetics and engineering."}
+            </motion.p>
 
-            <MagneticButton variant="secondary" color="purple">
-              Download CV <Download size={18} />
-            </MagneticButton>
-
-            <MagneticButton
-              variant="outline"
-              color="cyan"
-              onClick={() => scrollToSection('#contact')}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+              className="flex flex-wrap items-center gap-4"
             >
-              Contact Me <Mail size={18} />
-            </MagneticButton>
-          </motion.div>
+              <MagneticButton
+                color="blue"
+                onClick={() => scrollToSection('#portfolio')}
+              >
+                {data?.ctaText || 'View Portfolio'} <ArrowRight size={18} />
+              </MagneticButton>
+
+              {data?.resumeUrl && (
+                <a href={data.resumeUrl} target="_blank" rel="noreferrer">
+                  <MagneticButton variant="secondary" color="purple">
+                    Download CV <Download size={18} />
+                  </MagneticButton>
+                </a>
+              )}
+
+              <MagneticButton
+                variant="outline"
+                color="cyan"
+                onClick={() => scrollToSection('#contact')}
+              >
+                {data?.ctaSecondaryText || 'Contact Me'} <Mail size={18} />
+              </MagneticButton>
+            </motion.div>
+          </div>
+
+          {/* Right Side Image Layout */}
+          {hasImage && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1, delay: 0.4 }}
+              className="lg:w-2/5 w-full flex justify-center relative"
+            >
+              <div className="relative w-[300px] h-[400px] md:w-[400px] md:h-[500px]">
+                <div className="absolute inset-0 bg-gradient-to-tr from-neon-blue to-neon-purple rounded-[2rem] transform rotate-3 opacity-30 blur-xl" />
+                <div className="absolute inset-0 bg-dark-800 rounded-[2rem] transform -rotate-3 border border-white/10 overflow-hidden shadow-2xl">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={data.heroImage}
+                    alt={data.fullName || 'Hero'}
+                    className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                  />
+                </div>
+              </div>
+            </motion.div>
+          )}
         </div>
 
         {/* Quick Stats Cards */}
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.8 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-20"
-        >
-          {PERSONA.stats.map((stat, index) => (
-            <GlassCard
-              key={index}
-              className="p-6 text-center"
-              hoverEffect
-              glowColor="blue"
-            >
-              <div className="text-3xl md:text-4xl font-display font-bold text-white mb-1">
-                {stat.value}
-                {stat.suffix}
-              </div>
-              <div className="text-sm text-white/50 uppercase tracking-wider">
-                {stat.label}
-              </div>
-            </GlassCard>
-          ))}
-        </motion.div>
+        {data?.stats && data.stats.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.8 }}
+            className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-20"
+          >
+            {data.stats.map((stat: any, index: number) => (
+              <GlassCard
+                key={index}
+                className="p-6 text-center"
+                hoverEffect
+                glowColor="blue"
+              >
+                <div className="text-3xl md:text-4xl font-display font-bold text-white mb-1">
+                  {stat.value}
+                  {stat.suffix}
+                </div>
+                <div className="text-sm text-white/50 uppercase tracking-wider">
+                  {stat.label}
+                </div>
+              </GlassCard>
+            ))}
+          </motion.div>
+        )}
       </div>
     </section>
   );

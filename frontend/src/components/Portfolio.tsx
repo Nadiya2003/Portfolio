@@ -1,33 +1,35 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ExternalLink } from 'lucide-react';
-import { PROJECTS } from './data';
 import { SectionHeading } from './ui/SectionHeading';
 import { GlassCard } from './ui/GlassCard';
 import { BeforeAfterSlider } from './ui/BeforeAfterSlider';
 import { twMerge } from 'tailwind-merge';
 
-type Project = typeof PROJECTS[0];
-
-const CATEGORIES = [
-  'All',
-  'Graphic Design',
-  'Video Editing',
-  'Web Development',
-  'UI/UX Design',
-  'Pencil Art',
-];
-
-export function Portfolio() {
+export function Portfolio({ projects }: { projects?: any[] }) {
   const [activeFilter, setActiveFilter] = useState('All');
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [selectedProject, setSelectedProject] = useState<any | null>(null);
+
+  const allProjects = useMemo(() => {
+    if (!projects) return [];
+    return projects.filter(p => p.status !== 'archived').map(p => ({
+      ...p,
+      image: p.thumbnail, // Map backend thumbnail to frontend image prop
+      tags: p.tags || [],
+    }));
+  }, [projects]);
+
+  const CATEGORIES = useMemo(() => {
+    const cats = new Set(allProjects.map((p) => p.category).filter(Boolean));
+    return ['All', ...Array.from(cats)];
+  }, [allProjects]);
 
   const filteredProjects =
     activeFilter === 'All'
-      ? PROJECTS
-      : PROJECTS.filter((p) => p.category === activeFilter);
+      ? allProjects
+      : allProjects.filter((p) => p.category === activeFilter);
 
   return (
     <section id="portfolio" className="py-24 relative">
@@ -60,7 +62,7 @@ export function Portfolio() {
           <AnimatePresence mode="popLayout">
             {filteredProjects.map((project) => (
               <motion.div
-                key={project.id}
+                key={project._id}
                 layout
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -73,13 +75,17 @@ export function Portfolio() {
                   glowColor="blue"
                   onClick={() => setSelectedProject(project)}
                 >
-                  <div className="relative aspect-[4/3] overflow-hidden rounded-t-2xl">
+                  <div className="relative aspect-[4/3] overflow-hidden rounded-t-2xl bg-dark-800">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={project.image}
-                      alt={project.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
+                    {project.image ? (
+                      <img
+                        src={project.image}
+                        alt={project.title}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-white/20">No Thumbnail</div>
+                    )}
                     <div className="absolute inset-0 bg-dark-900/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                       <span className="px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white font-medium flex items-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
                         View Project <ExternalLink size={16} />
@@ -134,18 +140,22 @@ export function Portfolio() {
               <div className="p-1">
                 {/* Before/After Slider Area */}
                 <div className="w-full aspect-video md:aspect-[21/9] rounded-t-xl overflow-hidden relative bg-dark-800">
-                  {selectedProject.beforeImage ? (
+                  {selectedProject.beforeImage && selectedProject.image ? (
                     <BeforeAfterSlider
                       beforeImage={selectedProject.beforeImage}
                       afterImage={selectedProject.image}
                     />
                   ) : (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={selectedProject.image}
-                      alt={selectedProject.title}
-                      className="w-full h-full object-cover"
-                    />
+                    selectedProject.image ? (
+                      <img
+                        src={selectedProject.image}
+                        alt={selectedProject.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-white/20">No Image</div>
+                    )
                   )}
                 </div>
 
@@ -155,7 +165,7 @@ export function Portfolio() {
                     <span className="px-3 py-1 rounded-full bg-neon-blue/10 text-neon-blue border border-neon-blue/20 text-sm font-medium">
                       {selectedProject.category}
                     </span>
-                    {selectedProject.tags.map((tag) => (
+                    {selectedProject.tags.map((tag: string) => (
                       <span
                         key={tag}
                         className="px-3 py-1 rounded-full bg-white/5 text-white/60 border border-white/10 text-sm"
@@ -169,7 +179,7 @@ export function Portfolio() {
                     {selectedProject.title}
                   </h2>
 
-                  <p className="text-white/70 text-lg leading-relaxed max-w-3xl">
+                  <p className="text-white/70 text-lg leading-relaxed max-w-3xl whitespace-pre-wrap">
                     {selectedProject.description}
                   </p>
                 </div>

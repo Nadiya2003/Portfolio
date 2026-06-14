@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PERSONA } from './data';
 
 const PARTICLE_DATA = Array.from({ length: 18 }).map((_, i) => ({
   id: i,
@@ -141,7 +140,7 @@ export function IntroSequence() {
               transition={{ delay: 1.3, duration: 0.9 }}
               className="text-4xl md:text-6xl font-display font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white to-white/50 text-center"
             >
-              {PERSONA.name}
+              Nadiya
             </motion.h1>
 
             <motion.div
