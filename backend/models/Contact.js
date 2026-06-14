@@ -28,6 +28,7 @@ const contactSchema = new mongoose.Schema(
       trim: true,
       maxlength: [2000, 'Message cannot be more than 2000 characters'],
     },
+    isRead: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

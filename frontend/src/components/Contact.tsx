@@ -12,12 +12,11 @@ import {
   MessageCircle,
   Dribbble,
 } from 'lucide-react';
-import { PERSONA } from './data';
 import { SectionHeading } from './ui/SectionHeading';
 import { GlassCard } from './ui/GlassCard';
 import { MagneticButton } from './ui/MagneticButton';
 
-export function Contact() {
+export function Contact({ settings, hero }: { settings?: any, hero?: any }) {
   const [formState, setFormState] = useState({
     name: '',
     email: '',
@@ -67,6 +66,10 @@ export function Contact() {
     setFormState({ ...formState, [e.target.name]: e.target.value });
   };
 
+  const email = hero?.socials?.email || settings?.email || 'hello@example.com';
+  const phone = hero?.socials?.phone || settings?.phone || '+1 234 567 890';
+  const whatsapp = hero?.socials?.whatsapp || settings?.whatsapp || phone;
+
   return (
     <section id="contact" className="py-24 relative">
       <div className="container mx-auto px-6 md:px-12">
@@ -96,10 +99,10 @@ export function Contact() {
                 <div>
                   <h4 className="text-white font-medium mb-1">Email</h4>
                   <a
-                    href={`mailto:${PERSONA.socials.email}`}
+                    href={`mailto:${email}`}
                     className="text-white/60 hover:text-neon-blue transition-colors text-sm"
                   >
-                    {PERSONA.socials.email}
+                    {email}
                   </a>
                 </div>
               </GlassCard>
@@ -115,10 +118,10 @@ export function Contact() {
                 <div>
                   <h4 className="text-white font-medium mb-1">WhatsApp</h4>
                   <a
-                    href={`tel:${PERSONA.socials.whatsapp}`}
+                    href={`tel:${whatsapp}`}
                     className="text-white/60 hover:text-neon-purple transition-colors text-sm"
                   >
-                    {PERSONA.socials.phone}
+                    {phone}
                   </a>
                 </div>
               </GlassCard>
@@ -126,33 +129,39 @@ export function Contact() {
 
             {/* Social Links */}
             <GlassCard className="p-6 flex justify-center gap-6">
-              <a
-                href={PERSONA.socials.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white/50 hover:text-neon-blue transition-colors"
-                aria-label="LinkedIn"
-              >
-                <Linkedin size={24} />
-              </a>
-              <a
-                href={PERSONA.socials.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white/50 hover:text-white transition-colors"
-                aria-label="GitHub"
-              >
-                <Github size={24} />
-              </a>
-              <a
-                href={PERSONA.socials.dribbble}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white/50 hover:text-neon-cyan transition-colors"
-                aria-label="Dribbble"
-              >
-                <Dribbble size={24} />
-              </a>
+              {hero?.socials?.linkedin && (
+                <a
+                  href={hero.socials.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white/50 hover:text-neon-blue transition-colors"
+                  aria-label="LinkedIn"
+                >
+                  <Linkedin size={24} />
+                </a>
+              )}
+              {hero?.socials?.github && (
+                <a
+                  href={hero.socials.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white/50 hover:text-white transition-colors"
+                  aria-label="GitHub"
+                >
+                  <Github size={24} />
+                </a>
+              )}
+              {hero?.socials?.dribbble && (
+                <a
+                  href={hero.socials.dribbble}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white/50 hover:text-neon-cyan transition-colors"
+                  aria-label="Dribbble"
+                >
+                  <Dribbble size={24} />
+                </a>
+              )}
             </GlassCard>
 
             {/* Stylized Dark Map Placeholder */}

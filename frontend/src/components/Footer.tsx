@@ -1,13 +1,14 @@
 'use client';
 
 import React from 'react';
-import { PERSONA } from './data';
 import { ArrowUp } from 'lucide-react';
 
-export function Footer() {
+export function Footer({ settings, hero }: { settings?: any, hero?: any }) {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const name = hero?.fullName || settings?.siteName || 'Portfolio';
 
   return (
     <footer className="relative border-t border-white/5 bg-dark-900 pt-16 pb-8 overflow-hidden">
@@ -18,9 +19,9 @@ export function Footer() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-12">
           <div className="text-2xl font-display font-bold tracking-tighter flex items-center gap-2">
             <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-neon-blue to-neon-purple flex items-center justify-center text-white shadow-[0_0_15px_rgba(59,130,246,0.5)]">
-              {PERSONA.name.charAt(0)}
+              {name.charAt(0)}
             </span>
-            <span>{PERSONA.name}</span>
+            <span>{name}</span>
           </div>
 
           <div className="flex items-center gap-6 text-sm text-white/60">
@@ -52,8 +53,7 @@ export function Footer() {
 
         <div className="text-center text-white/40 text-sm border-t border-white/5 pt-8">
           <p>
-            &copy; {new Date().getFullYear()} {PERSONA.name}. All rights
-            reserved.
+            &copy; {new Date().getFullYear()} {name}. All rights reserved.
           </p>
         </div>
       </div>

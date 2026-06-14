@@ -2,11 +2,12 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { PERSONA, TIMELINE } from './data';
 import { SectionHeading } from './ui/SectionHeading';
 import { GlassCard } from './ui/GlassCard';
 
-export function About() {
+export function About({ data }: { data?: any }) {
+  const experiences = data?.experience || [];
+
   return (
     <section id="about" className="py-24 relative">
       <div className="container mx-auto px-6 md:px-12">
@@ -19,20 +20,17 @@ export function About() {
             className="lg:col-span-5 relative"
           >
             <GlassCard className="p-2 relative z-10" glowColor="purple" hoverEffect>
-              <div className="relative rounded-xl overflow-hidden aspect-[4/5]">
+              <div className="relative rounded-xl overflow-hidden aspect-[4/5] bg-dark-800">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1974&auto=format&fit=crop"
-                  alt={PERSONA.name}
-                  className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-dark-900/80 via-transparent to-transparent" />
-                <div className="absolute bottom-6 left-6 right-6">
-                  <h3 className="text-2xl font-display font-bold text-white">
-                    {PERSONA.name}
-                  </h3>
-                  <p className="text-neon-purple font-medium">{PERSONA.title}</p>
-                </div>
+                {data?.profileImage ? (
+                  <img
+                    src={data.profileImage}
+                    alt="Portrait"
+                    className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-white/20">No Image</div>
+                )}
               </div>
             </GlassCard>
 
@@ -44,8 +42,8 @@ export function About() {
           {/* Right: Content & Timeline */}
           <div className="lg:col-span-7">
             <SectionHeading
-              title="About Me"
-              subtitle="The Journey"
+              title={data?.heading || "About Me"}
+              subtitle={data?.subHeading || "The Journey"}
               align="left"
               color="purple"
             />
@@ -56,12 +54,12 @@ export function About() {
               viewport={{ once: true }}
               className="prose prose-invert prose-lg max-w-none mb-12"
             >
-              <p className="text-white/70 leading-relaxed text-lg">{PERSONA.bio}</p>
+              <p className="text-white/70 leading-relaxed text-lg">{data?.description}</p>
             </motion.div>
 
             {/* Experience Timeline */}
             <div className="relative border-l border-white/10 ml-3 md:ml-0 space-y-8">
-              {TIMELINE.map((item, index) => (
+              {experiences.map((item: any, index: number) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, x: 20 }}
@@ -75,10 +73,10 @@ export function About() {
 
                   <GlassCard className="p-6" hoverEffect glowColor="purple">
                     <span className="inline-block px-3 py-1 rounded-full bg-white/5 text-neon-purple text-xs font-bold tracking-wider mb-3">
-                      {item.year}
+                      {item.startDate} - {item.current ? "Present" : item.endDate}
                     </span>
                     <h4 className="text-xl font-display font-bold text-white mb-1">
-                      {item.role}
+                      {item.title}
                     </h4>
                     <h5 className="text-white/50 text-sm mb-3">{item.company}</h5>
                     <p className="text-white/70 text-sm leading-relaxed">

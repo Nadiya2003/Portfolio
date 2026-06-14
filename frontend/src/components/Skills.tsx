@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { SKILLS } from './data';
 import { SectionHeading } from './ui/SectionHeading';
 import { GlassCard } from './ui/GlassCard';
 
@@ -58,7 +57,13 @@ const ProgressRing = ({ radius, stroke, progress, colorClass }: ProgressRingProp
   );
 };
 
-export function Skills() {
+export function Skills({ data }: { data?: any }) {
+  const allSkills = data?.skills || [];
+  
+  const designSkills = allSkills.filter((s: any) => s.category?.toLowerCase() === 'design');
+  const uiuxSkills = allSkills.filter((s: any) => s.category?.toLowerCase().replace(/[^a-z]/g, '') === 'uiux' || s.category?.toLowerCase() === 'ui/ux');
+  const devSkills = allSkills.filter((s: any) => s.category?.toLowerCase() === 'development' || s.category?.toLowerCase() === 'frontend' || s.category?.toLowerCase() === 'backend');
+
   return (
     <section id="skills" className="py-24 relative">
       <div className="container mx-auto px-6 md:px-12">
@@ -70,83 +75,79 @@ export function Skills() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Design Skills */}
-          <GlassCard className="p-8" hoverEffect glowColor="purple">
-            <h3 className="text-xl font-display font-bold text-white mb-8 flex items-center gap-3">
-              <span className="w-2 h-2 rounded-full bg-neon-purple shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
-              Design
-            </h3>
-            <div className="grid grid-cols-2 gap-6">
-              {SKILLS.design.map((skill) => (
-                <div
-                  key={skill.name}
-                  className="flex flex-col items-center gap-3"
-                >
-                  <ProgressRing
-                    radius={40}
-                    stroke={4}
-                    progress={skill.level}
-                    colorClass="text-neon-purple drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]"
-                  />
-                  <span className="text-sm font-medium text-white/80 text-center">
-                    {skill.name}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </GlassCard>
+          {designSkills.length > 0 && (
+            <GlassCard className="p-8" hoverEffect glowColor="purple">
+              <h3 className="text-xl font-display font-bold text-white mb-8 flex items-center gap-3">
+                <span className="w-2 h-2 rounded-full bg-neon-purple shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
+                Design
+              </h3>
+              <div className="grid grid-cols-2 gap-6">
+                {designSkills.map((skill: any) => (
+                  <div key={skill.name} className="flex flex-col items-center gap-3">
+                    <ProgressRing
+                      radius={40}
+                      stroke={4}
+                      progress={skill.level}
+                      colorClass="text-neon-purple drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]"
+                    />
+                    <span className="text-sm font-medium text-white/80 text-center">{skill.name}</span>
+                  </div>
+                ))}
+              </div>
+            </GlassCard>
+          )}
 
           {/* UI/UX Skills */}
-          <GlassCard className="p-8" hoverEffect glowColor="cyan">
-            <h3 className="text-xl font-display font-bold text-white mb-8 flex items-center gap-3">
-              <span className="w-2 h-2 rounded-full bg-neon-cyan shadow-[0_0_10px_rgba(34,211,238,0.8)]" />
-              UI/UX
-            </h3>
-            <div className="grid grid-cols-2 gap-6">
-              {SKILLS.uiux.map((skill) => (
-                <div
-                  key={skill.name}
-                  className="flex flex-col items-center gap-3"
-                >
-                  <ProgressRing
-                    radius={40}
-                    stroke={4}
-                    progress={skill.level}
-                    colorClass="text-neon-cyan drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]"
-                  />
-                  <span className="text-sm font-medium text-white/80 text-center">
-                    {skill.name}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </GlassCard>
+          {uiuxSkills.length > 0 && (
+            <GlassCard className="p-8" hoverEffect glowColor="cyan">
+              <h3 className="text-xl font-display font-bold text-white mb-8 flex items-center gap-3">
+                <span className="w-2 h-2 rounded-full bg-neon-cyan shadow-[0_0_10px_rgba(34,211,238,0.8)]" />
+                UI/UX
+              </h3>
+              <div className="grid grid-cols-2 gap-6">
+                {uiuxSkills.map((skill: any) => (
+                  <div key={skill.name} className="flex flex-col items-center gap-3">
+                    <ProgressRing
+                      radius={40}
+                      stroke={4}
+                      progress={skill.level}
+                      colorClass="text-neon-cyan drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]"
+                    />
+                    <span className="text-sm font-medium text-white/80 text-center">{skill.name}</span>
+                  </div>
+                ))}
+              </div>
+            </GlassCard>
+          )}
 
           {/* Development Skills */}
-          <GlassCard className="p-8" hoverEffect glowColor="blue">
-            <h3 className="text-xl font-display font-bold text-white mb-8 flex items-center gap-3">
-              <span className="w-2 h-2 rounded-full bg-neon-blue shadow-[0_0_10px_rgba(59,130,246,0.8)]" />
-              Development
-            </h3>
-            <div className="space-y-5">
-              {SKILLS.development.map((skill) => (
-                <div key={skill.name}>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span className="text-white/80">{skill.name}</span>
-                    <span className="text-neon-blue">{skill.level}%</span>
+          {devSkills.length > 0 && (
+            <GlassCard className="p-8" hoverEffect glowColor="blue">
+              <h3 className="text-xl font-display font-bold text-white mb-8 flex items-center gap-3">
+                <span className="w-2 h-2 rounded-full bg-neon-blue shadow-[0_0_10px_rgba(59,130,246,0.8)]" />
+                Development
+              </h3>
+              <div className="space-y-5">
+                {devSkills.map((skill: any) => (
+                  <div key={skill.name}>
+                    <div className="flex justify-between text-sm mb-2">
+                      <span className="text-white/80">{skill.name}</span>
+                      <span className="text-neon-blue">{skill.level}%</span>
+                    </div>
+                    <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        whileInView={{ width: `${skill.level}%` }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 1, delay: 0.2 }}
+                        className="h-full bg-neon-blue shadow-[0_0_10px_rgba(59,130,246,0.8)] rounded-full"
+                      />
+                    </div>
                   </div>
-                  <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      whileInView={{ width: `${skill.level}%` }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 1, delay: 0.2 }}
-                      className="h-full bg-neon-blue shadow-[0_0_10px_rgba(59,130,246,0.8)] rounded-full"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </GlassCard>
+                ))}
+              </div>
+            </GlassCard>
+          )}
         </div>
       </div>
     </section>
