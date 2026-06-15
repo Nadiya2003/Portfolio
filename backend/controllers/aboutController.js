@@ -1,5 +1,5 @@
 const About = require('../models/About');
-const cloudinary = require('../config/cloudinary');
+const { destroyAsset } = require('../middleware/upload');
 
 const getAbout = async (req, res) => {
   try {
@@ -32,7 +32,7 @@ const updateAbout = async (req, res) => {
     });
 
     if (req.file) {
-      if (about.profileImagePublicId) await cloudinary.uploader.destroy(about.profileImagePublicId);
+      await destroyAsset(about.profileImagePublicId);
       about.profileImage = req.file.path;
       about.profileImagePublicId = req.file.filename;
     }

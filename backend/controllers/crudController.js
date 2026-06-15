@@ -1,179 +1,178 @@
-const createCrudController = (Model, folder = 'projects') => {
-  const cloudinary = require('../config/cloudinary');
-  const { cloudinaryConfigured } = require('../middleware/upload');
+/**
+ * controllers/crudController.js
+ * Generic CRUD factory used by: graphic, uiux, web, video, pencil, project routes.
+ * Expects multer-storage-cloudinary: file.path = secure URL, file.filename = public_id.
+ */
 
-  // Helper: extract image URL from uploaded file (Cloudinary gives .path, memory gives nothing useful)
-  const fileUrl = (file) => {
-    if (!file) return null;
-    if (cloudinaryConfigured && file.path) return file.path;
-    return null; // memory storage — no persistent URL
-  };
+'use strict';
 
+const { destroyAsset } = require('../middleware/upload');
+
+const createCrudController = (Model) => {
+
+  // ─── GET ALL ──────────────────────────────────────────────────────────────
   const getAll = async (req, res) => {
     try {
-      const { page = 1, limit = 20, status, category, search } = req.query;
+      const { page = 1, limit = 20, status, category, type, search } = req.query;
       const filter = {};
-      if (status) filter.status = status;
+      if (status)   filter.status   = status;
       if (category) filter.category = category;
-      if (search) filter.title = { $regex: search, $options: 'i' };
+      if (type)     filter.type     = type;
+      if (search)   filter.title    = { $regex: search, $options: 'i' };
 
       const total = await Model.countDocuments(filter);
       const items = await Model.find(filter)
         .sort({ order: 1, createdAt: -1 })
-        .skip((page - 1) * limit)
+        .skip((Number(page) - 1) * Number(limit))
         .limit(Number(limit));
 
       res.json({ success: true, data: items, total, page: Number(page), limit: Number(limit) });
-    } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
+    } catch (err) {
+      res.status(500).json({ success: false, message: err.message });
     }
   };
 
+  // ─── GET ONE ──────────────────────────────────────────────────────────────
   const getOne = async (req, res) => {
     try {
       const item = await Model.findById(req.params.id);
       if (!item) return res.status(404).json({ success: false, message: 'Not found.' });
       res.json({ success: true, data: item });
-    } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
+    } catch (err) {
+      res.status(500).json({ success: false, message: err.message });
     }
   };
 
+  // ─── CREATE ───────────────────────────────────────────────────────────────
   const create = async (req, res) => {
     try {
       const data = { ...req.body };
 
-      const thumbUrl = fileUrl(req.files?.thumbnail?.[0]);
-      if (thumbUrl) {
-        data.thumbnail = thumbUrl;
-        data.thumbnailPublicId = req.files.thumbnail[0].filename;
+      // Single-file fields
+      if (req.files?.thumbnail?.[0]) {
+        data.thumbnail          = req.files.thumbnail[0].path;
+        data.thumbnailPublicId  = req.files.thumbnail[0].filename;
+      }
+      if (req.files?.beforeImage?.[0]) {
+        data.beforeImage          = req.files.beforeImage[0].path;
+        data.beforeImagePublicId  = req.files.beforeImage[0].filename;
       }
 
-      const beforeUrl = fileUrl(req.files?.beforeImage?.[0]);
-      if (beforeUrl) {
-        data.beforeImage = beforeUrl;
-        data.beforeImagePublicId = req.files.beforeImage[0].filename;
+      // Multi-file fields
+      if (req.files?.gallery?.length) {
+        data.gallery = req.files.gallery.map((f) => ({ url: f.path, publicId: f.filename }));
+      }
+      if (req.files?.screenshots?.length) {
+        data.screenshots = req.files.screenshots.map((f) => ({ url: f.path, publicId: f.filename }));
+      }
+      if (req.files?.artworkImages?.length) {
+        data.artworkImages = req.files.artworkImages.map((f) => ({ url: f.path, publicId: f.filename }));
       }
 
-      if (req.files?.gallery) {
-        data.gallery = req.files.gallery
-          .map((f) => fileUrl(f) ? { url: fileUrl(f), publicId: f.filename } : null)
-          .filter(Boolean);
-      }
-      if (req.files?.screenshots) {
-        data.screenshots = req.files.screenshots
-          .map((f) => fileUrl(f) ? { url: fileUrl(f), publicId: f.filename } : null)
-          .filter(Boolean);
-      }
-      if (req.files?.artworkImages) {
-        data.artworkImages = req.files.artworkImages
-          .map((f) => fileUrl(f) ? { url: fileUrl(f), publicId: f.filename } : null)
-          .filter(Boolean);
+      // Video file
+      if (req.files?.video?.[0]) {
+        data.videoUrl       = req.files.video[0].path;
+        data.videoPublicId  = req.files.video[0].filename;
       }
 
       const item = await Model.create(data);
       res.status(201).json({ success: true, data: item });
-    } catch (error) {
-      console.error('Create error:', error);
-      res.status(400).json({ success: false, message: error.message });
+    } catch (err) {
+      console.error('[CRUD create]', err);
+      res.status(400).json({ success: false, message: err.message || String(err), err });
     }
   };
 
+  // ─── UPDATE ───────────────────────────────────────────────────────────────
   const update = async (req, res) => {
     try {
       const item = await Model.findById(req.params.id);
       if (!item) return res.status(404).json({ success: false, message: 'Not found.' });
 
-      const fieldsToSave = { ...req.body };
+      // Replace thumbnail
+      if (req.files?.thumbnail?.[0]) {
+        await destroyAsset(item.thumbnailPublicId);
+        item.thumbnail         = req.files.thumbnail[0].path;
+        item.thumbnailPublicId = req.files.thumbnail[0].filename;
+      }
 
-      if (req.files) {
-        const thumbFile = req.files.thumbnail?.[0];
-        if (thumbFile) {
-          const url = fileUrl(thumbFile);
-          if (url) {
-            if (cloudinaryConfigured && item.thumbnailPublicId) {
-              await cloudinary.uploader.destroy(item.thumbnailPublicId).catch(() => {});
-            }
-            fieldsToSave.thumbnail = url;
-            fieldsToSave.thumbnailPublicId = thumbFile.filename;
-          }
+      // Replace beforeImage
+      if (req.files?.beforeImage?.[0]) {
+        await destroyAsset(item.beforeImagePublicId);
+        item.beforeImage          = req.files.beforeImage[0].path;
+        item.beforeImagePublicId  = req.files.beforeImage[0].filename;
+      }
+
+      // Replace video
+      if (req.files?.video?.[0]) {
+        await destroyAsset(item.videoPublicId, 'video');
+        item.videoUrl      = req.files.video[0].path;
+        item.videoPublicId = req.files.video[0].filename;
+      }
+
+      // Append to multi-file arrays
+      if (req.files?.gallery?.length) {
+        const incoming = req.files.gallery.map((f) => ({ url: f.path, publicId: f.filename }));
+        item.gallery = [...(item.gallery || []), ...incoming];
+      }
+      if (req.files?.screenshots?.length) {
+        const incoming = req.files.screenshots.map((f) => ({ url: f.path, publicId: f.filename }));
+        item.screenshots = [...(item.screenshots || []), ...incoming];
+      }
+      if (req.files?.artworkImages?.length) {
+        const incoming = req.files.artworkImages.map((f) => ({ url: f.path, publicId: f.filename }));
+        item.artworkImages = [...(item.artworkImages || []), ...incoming];
+      }
+
+      // Merge scalar body fields
+      const bodyFields = { ...req.body };
+      Object.keys(bodyFields).forEach((k) => {
+        if (!['_id', '__v', 'createdAt', 'updatedAt'].includes(k)) {
+          item[k] = bodyFields[k];
         }
-
-        const beforeFile = req.files.beforeImage?.[0];
-        if (beforeFile) {
-          const url = fileUrl(beforeFile);
-          if (url) {
-            if (cloudinaryConfigured && item.beforeImagePublicId) {
-              await cloudinary.uploader.destroy(item.beforeImagePublicId).catch(() => {});
-            }
-            fieldsToSave.beforeImage = url;
-            fieldsToSave.beforeImagePublicId = beforeFile.filename;
-          }
-        }
-      }
-
-      Object.assign(item, fieldsToSave);
-
-      if (req.files?.gallery) {
-        const newImages = req.files.gallery
-          .map((f) => fileUrl(f) ? { url: fileUrl(f), publicId: f.filename } : null)
-          .filter(Boolean);
-        if (newImages.length) item.gallery = [...(item.gallery || []), ...newImages];
-      }
-      if (req.files?.screenshots) {
-        const newScreenshots = req.files.screenshots
-          .map((f) => fileUrl(f) ? { url: fileUrl(f), publicId: f.filename } : null)
-          .filter(Boolean);
-        if (newScreenshots.length) item.screenshots = [...(item.screenshots || []), ...newScreenshots];
-      }
-      if (req.files?.artworkImages) {
-        const newArtwork = req.files.artworkImages
-          .map((f) => fileUrl(f) ? { url: fileUrl(f), publicId: f.filename } : null)
-          .filter(Boolean);
-        if (newArtwork.length) item.artworkImages = [...(item.artworkImages || []), ...newArtwork];
-      }
+      });
 
       await item.save();
       res.json({ success: true, data: item });
-    } catch (error) {
-      console.error('Update error:', error);
-      res.status(400).json({ success: false, message: error.message });
+    } catch (err) {
+      console.error('[CRUD update]', err);
+      res.status(400).json({ success: false, message: err.message || String(err), err });
     }
   };
 
+  // ─── DELETE ───────────────────────────────────────────────────────────────
   const remove = async (req, res) => {
     try {
       const item = await Model.findById(req.params.id);
       if (!item) return res.status(404).json({ success: false, message: 'Not found.' });
 
-      if (cloudinaryConfigured) {
-        if (item.thumbnailPublicId) await cloudinary.uploader.destroy(item.thumbnailPublicId).catch(() => {});
-        if (item.beforeImagePublicId) await cloudinary.uploader.destroy(item.beforeImagePublicId).catch(() => {});
-        const galleries = [...(item.gallery || []), ...(item.screenshots || []), ...(item.artworkImages || [])];
-        for (const img of galleries) {
-          if (img.publicId) await cloudinary.uploader.destroy(img.publicId).catch(() => {});
-        }
+      // Delete all associated Cloudinary assets
+      await destroyAsset(item.thumbnailPublicId);
+      await destroyAsset(item.beforeImagePublicId);
+      await destroyAsset(item.videoPublicId, 'video');
+      for (const img of [...(item.gallery || []), ...(item.screenshots || []), ...(item.artworkImages || [])]) {
+        await destroyAsset(img.publicId);
       }
 
       await item.deleteOne();
       res.json({ success: true, message: 'Deleted successfully.' });
-    } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
+    } catch (err) {
+      res.status(500).json({ success: false, message: err.message });
     }
   };
 
+  // ─── REORDER ──────────────────────────────────────────────────────────────
   const reorder = async (req, res) => {
     try {
-      const { items } = req.body;
-      for (const { id, order } of items) {
-        await Model.findByIdAndUpdate(id, { order });
-      }
+      const { items } = req.body; // [{ id, order }]
+      await Promise.all(items.map(({ id, order }) => Model.findByIdAndUpdate(id, { order })));
       res.json({ success: true, message: 'Reordered.' });
-    } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
+    } catch (err) {
+      res.status(500).json({ success: false, message: err.message });
     }
   };
 
+  // ─── TOGGLE STATUS ────────────────────────────────────────────────────────
   const toggleStatus = async (req, res) => {
     try {
       const item = await Model.findById(req.params.id);
@@ -181,8 +180,8 @@ const createCrudController = (Model, folder = 'projects') => {
       item.status = item.status === 'published' ? 'draft' : 'published';
       await item.save();
       res.json({ success: true, data: item });
-    } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
+    } catch (err) {
+      res.status(500).json({ success: false, message: err.message });
     }
   };
 

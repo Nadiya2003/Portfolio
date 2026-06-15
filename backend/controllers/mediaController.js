@@ -1,5 +1,5 @@
-const cloudinary = require('../config/cloudinary');
 const MediaFile = require('../models/MediaFile');
+const { destroyAsset } = require('../middleware/upload');
 
 // GET /api/media
 const getMedia = async (req, res) => {
@@ -55,7 +55,7 @@ const deleteMedia = async (req, res) => {
     const file = await MediaFile.findById(req.params.id);
     if (!file) return res.status(404).json({ success: false, message: 'File not found.' });
 
-    await cloudinary.uploader.destroy(file.publicId, { resource_type: file.resourceType === 'raw' ? 'raw' : file.resourceType });
+    await destroyAsset(file.publicId, file.resourceType === 'raw' ? 'raw' : file.resourceType);
     await file.deleteOne();
 
     res.json({ success: true, message: 'File deleted.' });

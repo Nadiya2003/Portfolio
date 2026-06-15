@@ -1,6 +1,7 @@
 import { Layout } from '@/components/Layout';
 import { IntroSequence } from '@/components/IntroSequence';
 import { Navigation } from '@/components/Navigation';
+import { FaviconUpdater } from '@/components/FaviconUpdater';
 import { Hero } from '@/components/Hero';
 import { About } from '@/components/About';
 import { Services } from '@/components/Services';
@@ -50,20 +51,24 @@ export default async function Home() {
     fetchAPI('pencil'),
   ]);
 
-  // Merge projects
+  // Merge projects — tag each with its section type for frontend filtering
+  const tagItems = (items: any[] | null, sectionType: string) =>
+    (items || []).map(item => ({ ...item, _sectionType: sectionType }));
+
   const allProjects = [
-    ...(projects || []),
-    ...(graphic || []),
-    ...(uiux || []),
-    ...(web || []),
-    ...(video || []),
-    ...(pencil || []),
+    ...tagItems(projects, 'Projects'),
+    ...tagItems(graphic,  'Graphic Design'),
+    ...tagItems(uiux,     'UI/UX Design'),
+    ...tagItems(web,      'Web Development'),
+    ...tagItems(video,    'Video Editing'),
+    ...tagItems(pencil,   'Pencil Arts'),
   ].sort((a, b) => (a.order || 0) - (b.order || 0));
 
   return (
     <Layout>
+      {settings?.favicon && <FaviconUpdater faviconUrl={settings.favicon} />}
       <IntroSequence />
-      <Navigation />
+      <Navigation settings={settings} />
       <Hero data={hero} />
       <About data={about} />
       <Services data={services} />

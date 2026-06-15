@@ -6,6 +6,10 @@ const connectDB = require('./config/db');
 // Connect to database
 connectDB();
 
+// Initialize Cloudinary
+const { initCloudinary } = require('./config/cloudinary');
+initCloudinary();
+
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -21,6 +25,10 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Serve static uploads when Cloudinary is not used
+const path = require('path');
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Health check
 app.get('/', (req, res) => res.send('Portfolio Backend API is running'));
@@ -51,8 +59,8 @@ app.use('/api/media', require('./routes/mediaRoutes'));
 
 // Global error handler
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ success: false, message: err.message || 'Internal Server Error' });
+  console.error('\n[Global Error]', err);
+  res.status(500).json({ success: false, message: err.message || 'Internal Server Error', error: err });
 });
 
 app.listen(port, () => {
