@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useSettingsStore } from "@/store/useSettingsStore";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
 import { usePathname } from "next/navigation";
@@ -28,6 +29,7 @@ const pageTitles: Record<string, { title: string; subtitle: string }> = {
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const { token, fetchMe, admin } = useAuthStore();
+  const { fetchSettings } = useSettingsStore();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -39,8 +41,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       router.replace("/login");
     } else if (!admin) {
       fetchMe();
+      fetchSettings();
     }
-  }, [token, admin, fetchMe, router]);
+  }, [token, admin, fetchMe, fetchSettings, router]);
 
   if (!mounted || !token) return null;
 

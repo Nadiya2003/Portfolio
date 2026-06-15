@@ -1,5 +1,5 @@
 const SiteSettings = require('../models/SiteSettings');
-const cloudinary = require('../config/cloudinary');
+const { destroyAsset } = require('../middleware/upload');
 
 const getSettings = async (req, res) => {
   try {
@@ -30,12 +30,12 @@ const updateSettings = async (req, res) => {
     });
 
     if (req.files?.logo?.[0]) {
-      if (settings.logoPublicId) await cloudinary.uploader.destroy(settings.logoPublicId);
+      await destroyAsset(settings.logoPublicId);
       settings.logo = req.files.logo[0].path;
       settings.logoPublicId = req.files.logo[0].filename;
     }
     if (req.files?.favicon?.[0]) {
-      if (settings.faviconPublicId) await cloudinary.uploader.destroy(settings.faviconPublicId);
+      await destroyAsset(settings.faviconPublicId);
       settings.favicon = req.files.favicon[0].path;
       settings.faviconPublicId = req.files.favicon[0].filename;
     }

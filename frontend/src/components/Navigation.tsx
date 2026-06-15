@@ -15,7 +15,7 @@ const NAV_LINKS = [
   { name: 'Contact', href: '#contact' },
 ];
 
-export function Navigation() {
+export function Navigation({ settings }: { settings?: any }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -72,10 +72,15 @@ export function Navigation() {
             onClick={(e) => scrollTo(e, '#home')}
             className="text-xl font-display font-bold tracking-tighter flex items-center gap-2 group"
           >
-            <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-neon-blue to-neon-purple flex items-center justify-center text-white shadow-[0_0_15px_rgba(59,130,246,0.5)] group-hover:shadow-[0_0_25px_rgba(168,85,247,0.6)] transition-shadow">
-              N
-            </span>
-            <span className="hidden sm:block">Nadiya</span>
+            {settings?.logo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={settings.logo} alt="Logo" className="w-8 h-8 rounded-lg object-contain shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
+            ) : (
+              <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-neon-blue to-neon-purple flex items-center justify-center text-white shadow-[0_0_15px_rgba(59,130,246,0.5)] group-hover:shadow-[0_0_25px_rgba(168,85,247,0.6)] transition-shadow">
+                {settings?.siteName ? settings.siteName.charAt(0) : 'N'}
+              </span>
+            )}
+            <span className="hidden sm:block">{settings?.siteName || 'Nadiya'}</span>
           </a>
 
           {/* Desktop Nav */}

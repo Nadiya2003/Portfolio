@@ -21,7 +21,6 @@ export default function ProjectsPage() {
       <ContentTable
         endpoint="projects"
         title="Portfolio Projects"
-        categories={["Frontend", "Backend", "Full Stack", "Mobile App", "Other"]}
         fields={[{ key: "category", label: "Category" }]}
         FormComponent={(props) => <GenericForm {...props} endpoint="projects" fields={fields as any} hasThumbnail hasBeforeImage hasTags hasGallery />}
       />

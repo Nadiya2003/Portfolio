@@ -1,5 +1,5 @@
 const Hero = require('../models/Hero');
-const cloudinary = require('../config/cloudinary');
+const { destroyAsset } = require('../middleware/upload');
 
 // GET /api/hero
 const getHero = async (req, res) => {
@@ -30,17 +30,17 @@ const updateHero = async (req, res) => {
     });
 
     if (req.files?.heroImage?.[0]) {
-      if (hero.heroImagePublicId) await cloudinary.uploader.destroy(hero.heroImagePublicId);
+      await destroyAsset(hero.heroImagePublicId);
       hero.heroImage = req.files.heroImage[0].path;
       hero.heroImagePublicId = req.files.heroImage[0].filename;
     }
     if (req.files?.backgroundImage?.[0]) {
-      if (hero.backgroundImagePublicId) await cloudinary.uploader.destroy(hero.backgroundImagePublicId);
+      await destroyAsset(hero.backgroundImagePublicId);
       hero.backgroundImage = req.files.backgroundImage[0].path;
       hero.backgroundImagePublicId = req.files.backgroundImage[0].filename;
     }
     if (req.files?.resume?.[0]) {
-      if (hero.resumePublicId) await cloudinary.uploader.destroy(hero.resumePublicId, { resource_type: 'raw' });
+      await destroyAsset(hero.resumePublicId, 'raw');
       hero.resumeUrl = req.files.resume[0].path;
       hero.resumePublicId = req.files.resume[0].filename;
     }

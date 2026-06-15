@@ -11,6 +11,7 @@ import {
   Star, Mail, Layout
 } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useSettingsStore } from "@/store/useSettingsStore";
 import { cn, getInitials } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 
@@ -41,6 +42,7 @@ interface SidebarProps { collapsed: boolean; onToggle: () => void; }
 export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
   const { admin, logout } = useAuthStore();
+  const { settings } = useSettingsStore();
   const router = useRouter();
 
   const handleLogout = () => {
@@ -60,17 +62,27 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
         <AnimatePresence mode="wait">
           {!collapsed && (
             <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg gradient-purple flex items-center justify-center flex-shrink-0">
-                <Sparkles size={14} className="text-white" />
-              </div>
-              <span className="font-bold text-sm text-white tracking-tight">Portfolio CMS</span>
+              {settings?.logo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={settings.logo} alt="Logo" className="w-7 h-7 rounded-lg object-contain bg-white/5" />
+              ) : (
+                <div className="w-7 h-7 rounded-lg gradient-purple flex items-center justify-center flex-shrink-0">
+                  <Sparkles size={14} className="text-white" />
+                </div>
+              )}
+              <span className="font-bold text-sm text-white tracking-tight">{settings?.siteName || "Portfolio CMS"}</span>
             </motion.div>
           )}
         </AnimatePresence>
         {collapsed && (
-          <div className="w-7 h-7 rounded-lg gradient-purple flex items-center justify-center mx-auto">
-            <Sparkles size={14} className="text-white" />
-          </div>
+          settings?.logo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={settings.logo} alt="Logo" className="w-7 h-7 rounded-lg object-contain bg-white/5 mx-auto" />
+          ) : (
+            <div className="w-7 h-7 rounded-lg gradient-purple flex items-center justify-center mx-auto">
+              <Sparkles size={14} className="text-white" />
+            </div>
+          )
         )}
         <button onClick={onToggle} className={cn("w-7 h-7 rounded-lg glass flex items-center justify-center text-[#71717A] hover:text-white transition-colors flex-shrink-0", collapsed && "mx-auto")}>
           {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
