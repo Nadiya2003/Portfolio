@@ -107,6 +107,14 @@ export default function SettingsPage() {
           "seo.metaDescription": d.seo?.metaDescription || "",
           "seo.metaKeywords": d.seo?.keywords?.join(", ") || "",
           maintenanceMode: d.maintenanceMode || false,
+          "socials.facebook": d.socials?.facebook || "",
+          "socials.instagram": d.socials?.instagram || "",
+          "socials.linkedin": d.socials?.linkedin || "",
+          "socials.twitter": d.socials?.twitter || "",
+          "socials.github": d.socials?.github || "",
+          "socials.behance": d.socials?.behance || "",
+          "socials.dribbble": d.socials?.dribbble || "",
+          "socials.youtube": d.socials?.youtube || "",
         });
       })
       .finally(() => setLoading(false));
@@ -134,6 +142,21 @@ export default function SettingsPage() {
             .split(",")
             .map((k: string) => k.trim())
             .filter(Boolean),
+        })
+      );
+
+      // Socials as JSON
+      formData.append(
+        "socials",
+        JSON.stringify({
+          facebook: data["socials.facebook"] || "",
+          instagram: data["socials.instagram"] || "",
+          linkedin: data["socials.linkedin"] || "",
+          twitter: data["socials.twitter"] || "",
+          github: data["socials.github"] || "",
+          behance: data["socials.behance"] || "",
+          dribbble: data["socials.dribbble"] || "",
+          youtube: data["socials.youtube"] || "",
         })
       );
 
@@ -210,6 +233,21 @@ export default function SettingsPage() {
                 placeholder="graphic design, UI/UX, web development"
               />
             </Field>
+          </div>
+
+          {/* Social Media */}
+          <div className="glass rounded-2xl p-6 space-y-4">
+            <h3 className="text-sm font-semibold text-white">Social Media Links</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Field label="Facebook"><Input {...register("socials.facebook")} placeholder="https://facebook.com/..." /></Field>
+              <Field label="Instagram"><Input {...register("socials.instagram")} placeholder="https://instagram.com/..." /></Field>
+              <Field label="LinkedIn"><Input {...register("socials.linkedin")} placeholder="https://linkedin.com/in/..." /></Field>
+              <Field label="Twitter"><Input {...register("socials.twitter")} placeholder="https://twitter.com/..." /></Field>
+              <Field label="GitHub"><Input {...register("socials.github")} placeholder="https://github.com/..." /></Field>
+              <Field label="Behance"><Input {...register("socials.behance")} placeholder="https://behance.net/..." /></Field>
+              <Field label="Dribbble"><Input {...register("socials.dribbble")} placeholder="https://dribbble.com/..." /></Field>
+              <Field label="YouTube"><Input {...register("socials.youtube")} placeholder="https://youtube.com/..." /></Field>
+            </div>
           </div>
         </div>
 

@@ -10,6 +10,7 @@ import { Skills } from '@/components/Skills';
 import { Testimonials } from '@/components/Testimonials';
 import { Contact } from '@/components/Contact';
 import { Footer } from '@/components/Footer';
+import { FloatingControls } from '@/components/FloatingControls';
 
 const fetchAPI = async (endpoint: string) => {
   try {
@@ -77,6 +78,7 @@ export default async function Home() {
       <Testimonials data={testimonials} />
       <Contact settings={settings} hero={hero} />
       <Footer settings={settings} hero={hero} />
+      <FloatingControls />
     </Layout>
   );
 }

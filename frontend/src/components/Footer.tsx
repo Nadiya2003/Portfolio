@@ -1,14 +1,24 @@
 'use client';
 
 import React from 'react';
-import { ArrowUp } from 'lucide-react';
+import { Facebook, Instagram, Linkedin, Twitter, Github, Youtube, Dribbble, Globe } from 'lucide-react';
 
 export function Footer({ settings, hero }: { settings?: any, hero?: any }) {
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
   const name = hero?.fullName || settings?.siteName || 'Portfolio';
+  const socials = settings?.socials || {};
+
+  const getSocialIcon = (key: string) => {
+    switch (key) {
+      case 'facebook': return <Facebook size={18} />;
+      case 'instagram': return <Instagram size={18} />;
+      case 'linkedin': return <Linkedin size={18} />;
+      case 'twitter': return <Twitter size={18} />;
+      case 'github': return <Github size={18} />;
+      case 'youtube': return <Youtube size={18} />;
+      case 'dribbble': return <Dribbble size={18} />;
+      default: return <Globe size={18} />;
+    }
+  };
 
   return (
     <footer className="relative border-t border-white/5 bg-dark-900 pt-16 pb-8 overflow-hidden">
@@ -39,16 +49,23 @@ export function Footer({ settings, hero }: { settings?: any, hero?: any }) {
             </a>
           </div>
 
-          <button
-            onClick={scrollToTop}
-            aria-label="Scroll to top"
-            className="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-white/60 hover:text-white hover:border-neon-blue/50 transition-all group"
-          >
-            <ArrowUp
-              size={20}
-              className="group-hover:-translate-y-1 transition-transform"
-            />
-          </button>
+          <div className="flex items-center gap-4">
+            {Object.entries(socials).map(([key, url]) => {
+              if (!url) return null;
+              return (
+                <a
+                  key={key}
+                  href={url as string}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-white/60 hover:text-white hover:border-neon-blue/50 hover:bg-neon-blue/10 transition-all group"
+                  aria-label={key}
+                >
+                  {getSocialIcon(key)}
+                </a>
+              );
+            })}
+          </div>
         </div>
 
         <div className="text-center text-white/40 text-sm border-t border-white/5 pt-8">

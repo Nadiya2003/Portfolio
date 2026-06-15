@@ -95,7 +95,7 @@ export default function AboutPage() {
               <h3 className="text-sm font-semibold text-white">Skills</h3>
               <button type="button" onClick={addSkill} className="flex items-center gap-1 text-xs text-[#8B5CF6] hover:text-[#A78BFA] transition-colors"><Plus size={13} /> Add Skill</button>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
               {skills.map((_: unknown, i: number) => (
                 <div key={i} className="flex items-center gap-3">
                   <GripVertical size={14} className="text-[#3f3f46] flex-shrink-0" />

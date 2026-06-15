@@ -7,7 +7,7 @@ const { upload } = require('../middleware/upload');
 
 const ctrl = createCrudController(Testimonial, 'testimonials');
 const uploader = upload('testimonials').fields([
-  { name: 'clientPhoto', maxCount: 1 },
+  { name: 'thumbnail', maxCount: 1 },
 ]);
 
 router.get('/', ctrl.getAll);

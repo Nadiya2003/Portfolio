@@ -30,6 +30,8 @@ export function getInitials(name: string) {
     .slice(0, 2);
 }
 
-export function truncate(str: string, length: number) {
-  return str.length > length ? str.slice(0, length) + "..." : str;
+export function truncate(str: string | undefined | null, length: number) {
+  if (!str) return "";
+  const s = String(str);
+  return s.length > length ? s.slice(0, length) + "..." : s;
 }
