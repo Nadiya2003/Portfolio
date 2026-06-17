@@ -44,6 +44,7 @@ const settingsRoutes = require('./routes/settingsRoutes');
 app.use('/api/auth', authRoutes);
 app.use('/api/hero', heroRoutes);
 app.use('/api/about', aboutRoutes);
+app.use('/api/skills', require('./routes/skillRoutes'));
 app.use('/api/services', serviceRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/contact', require('./routes/contactRoutes'));
