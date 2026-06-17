@@ -7,6 +7,7 @@ import { GlassCard } from './ui/GlassCard';
 
 export function About({ data }: { data?: any }) {
   const experiences = data?.experience || [];
+  const education = data?.education || [];
 
   return (
     <section id="about" className="py-24 relative">
@@ -37,6 +38,44 @@ export function About({ data }: { data?: any }) {
             {/* Decorative elements */}
             <div className="absolute -top-6 -left-6 w-32 h-32 border border-neon-cyan/30 rounded-full blur-[2px] -z-10" />
             <div className="absolute -bottom-8 -right-8 w-48 h-48 bg-neon-purple/20 rounded-full blur-[60px] -z-10" />
+
+            {/* Education Timeline */}
+            {education.length > 0 && (
+              <div className="mt-16 md:mt-24 relative z-10">
+                <h3 className="text-2xl font-display font-bold text-white mb-6 flex items-center gap-2">
+                  <span className="w-8 h-[1px] bg-neon-cyan"></span>
+                  Education
+                </h3>
+                <div className="relative border-l border-white/10 ml-3 md:ml-0 space-y-8">
+                  {education.map((item: any, index: number) => (
+                    <motion.div
+                      key={`edu-${index}`}
+                      initial={{ opacity: 0, x: -20 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: index * 0.1 }}
+                      className="relative pl-8 md:pl-10"
+                    >
+                      {/* Timeline Dot */}
+                      <div className="absolute left-[-5px] top-1.5 w-2.5 h-2.5 rounded-full bg-neon-cyan shadow-[0_0_10px_rgba(34,211,238,0.8)]" />
+
+                      <GlassCard className="p-6" hoverEffect glowColor="cyan">
+                        <span className="inline-block px-3 py-1 rounded-full bg-white/5 text-neon-cyan text-xs font-bold tracking-wider mb-3">
+                          {item.startDate} - {item.endDate}
+                        </span>
+                        <h4 className="text-xl font-display font-bold text-white mb-1">
+                          {item.degree}
+                        </h4>
+                        <h5 className="text-white/50 text-sm mb-3">{item.institution}</h5>
+                        <p className="text-white/70 text-sm leading-relaxed">
+                          {item.description}
+                        </p>
+                      </GlassCard>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            )}
           </motion.div>
 
           {/* Right: Content & Timeline */}
@@ -58,34 +97,41 @@ export function About({ data }: { data?: any }) {
             </motion.div>
 
             {/* Experience Timeline */}
-            <div className="relative border-l border-white/10 ml-3 md:ml-0 space-y-8">
-              {experiences.map((item: any, index: number) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: 20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className="relative pl-8 md:pl-10"
-                >
-                  {/* Timeline Dot */}
-                  <div className="absolute left-[-5px] top-1.5 w-2.5 h-2.5 rounded-full bg-neon-purple shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
+            <div className="mb-12">
+              <h3 className="text-2xl font-display font-bold text-white mb-6 flex items-center gap-2">
+                <span className="w-8 h-[1px] bg-neon-purple"></span>
+                Experience
+              </h3>
+              <div className="relative border-l border-white/10 ml-3 md:ml-0 space-y-8">
+                {experiences.map((item: any, index: number) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: 20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1 }}
+                    className="relative pl-8 md:pl-10"
+                  >
+                    {/* Timeline Dot */}
+                    <div className="absolute left-[-5px] top-1.5 w-2.5 h-2.5 rounded-full bg-neon-purple shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
 
-                  <GlassCard className="p-6" hoverEffect glowColor="purple">
-                    <span className="inline-block px-3 py-1 rounded-full bg-white/5 text-neon-purple text-xs font-bold tracking-wider mb-3">
-                      {item.startDate} - {item.current ? "Present" : item.endDate}
-                    </span>
-                    <h4 className="text-xl font-display font-bold text-white mb-1">
-                      {item.title}
-                    </h4>
-                    <h5 className="text-white/50 text-sm mb-3">{item.company}</h5>
-                    <p className="text-white/70 text-sm leading-relaxed">
-                      {item.description}
-                    </p>
-                  </GlassCard>
-                </motion.div>
-              ))}
+                    <GlassCard className="p-6" hoverEffect glowColor="purple">
+                      <span className="inline-block px-3 py-1 rounded-full bg-white/5 text-neon-purple text-xs font-bold tracking-wider mb-3">
+                        {item.startDate} - {item.current ? "Present" : item.endDate}
+                      </span>
+                      <h4 className="text-xl font-display font-bold text-white mb-1">
+                        {item.title}
+                      </h4>
+                      <h5 className="text-white/50 text-sm mb-3">{item.company}</h5>
+                      <p className="text-white/70 text-sm leading-relaxed">
+                        {item.description}
+                      </p>
+                    </GlassCard>
+                  </motion.div>
+                ))}
+              </div>
             </div>
+
           </div>
         </div>
       </div>

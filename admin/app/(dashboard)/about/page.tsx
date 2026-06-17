@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import React, { useEffect, useState } from "react";
+import { useForm, useFieldArray } from "react-hook-form";
 import { motion } from "framer-motion";
-import { Save, Plus, Trash2, GripVertical } from "lucide-react";
+import { Save, Trash2, Plus, Zap, ArrowRight } from "lucide-react";
 import api from "@/lib/api";
 import toast from "react-hot-toast";
 import ImageUpload from "@/components/ui/ImageUpload";
@@ -15,13 +15,19 @@ const Field = ({ label, children }: { label: string; children: React.ReactNode }
   </div>
 );
 
-const Input = ({ className = "", ...props }: React.InputHTMLAttributes<HTMLInputElement>) => (
-  <input {...props} className={`w-full h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-[#52525b] outline-none focus:border-[#8B5CF6]/50 focus:ring-1 focus:ring-[#8B5CF6]/20 transition-all ${className}`} />
+const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
+  ({ className = "", ...props }, ref) => (
+    <input ref={ref} {...props} className={`w-full h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/40 outline-none focus:border-[#8B5CF6]/50 focus:ring-1 focus:ring-[#8B5CF6]/20 transition-all ${className}`} />
+  )
 );
+Input.displayName = "Input";
 
-const Textarea = ({ className = "", ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => (
-  <textarea {...props} className={`w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-[#52525b] outline-none focus:border-[#8B5CF6]/50 focus:ring-1 focus:ring-[#8B5CF6]/20 transition-all resize-none ${className}`} />
+const Textarea = React.forwardRef<HTMLTextAreaElement, React.TextareaHTMLAttributes<HTMLTextAreaElement>>(
+  ({ className = "", ...props }, ref) => (
+    <textarea ref={ref} {...props} className={`w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/40 outline-none focus:border-[#8B5CF6]/50 focus:ring-1 focus:ring-[#8B5CF6]/20 transition-all resize-none ${className}`} />
+  )
 );
+Textarea.displayName = "Textarea";
 
 export default function AboutPage() {
   const [loading, setLoading] = useState(true);
@@ -29,10 +35,10 @@ export default function AboutPage() {
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const [aboutData, setAboutData] = useState<Record<string, unknown> | null>(null);
 
-  const { register, handleSubmit, reset, setValue, watch } = useForm();
-  const skills = watch("skills") || [];
-  const experience = watch("experience") || [];
-  const education = watch("education") || [];
+  const { register, handleSubmit, reset, control } = useForm();
+  
+  const { fields: expFields, append: appendExp, remove: removeExp } = useFieldArray({ control, name: "experience" });
+  const { fields: eduFields, append: appendEdu, remove: removeEdu } = useFieldArray({ control, name: "education" });
 
   useEffect(() => {
     api.get("/about").then((res) => {
@@ -41,7 +47,6 @@ export default function AboutPage() {
       reset({
         heading: d.heading, subHeading: d.subHeading, description: d.description,
         yearsOfExperience: d.yearsOfExperience, completedProjects: d.completedProjects,
-        skills: Array.isArray(d.skills) ? d.skills : [],
         experience: Array.isArray(d.experience) ? d.experience : [],
         education: Array.isArray(d.education) ? d.education : []
       });
@@ -53,7 +58,7 @@ export default function AboutPage() {
     try {
       const formData = new FormData();
       Object.entries(data).forEach(([k, v]) => {
-        if (k === "skills" || k === "experience" || k === "education") formData.append(k, JSON.stringify(v));
+        if (k === "experience" || k === "education") formData.append(k, JSON.stringify(v));
         else formData.append(k, String(v ?? ""));
       });
       if (profileImageFile) formData.append("profileImage", profileImageFile);
@@ -64,14 +69,8 @@ export default function AboutPage() {
     finally { setSaving(false); }
   };
 
-  const addSkill = () => setValue("skills", [...skills, { name: "", level: 50, category: "frontend" }]);
-  const removeSkill = (i: number) => setValue("skills", skills.filter((_: unknown, idx: number) => idx !== i));
-
-  const addExp = () => setValue("experience", [...experience, { title: "", company: "", startDate: "", endDate: "", current: false, description: "" }]);
-  const removeExp = (i: number) => setValue("experience", experience.filter((_: unknown, idx: number) => idx !== i));
-
-  const addEdu = () => setValue("education", [...education, { degree: "", institution: "", startDate: "", endDate: "", description: "" }]);
-  const removeEdu = (i: number) => setValue("education", education.filter((_: unknown, idx: number) => idx !== i));
+  const addExp = () => appendExp({ title: "", company: "", startDate: "", endDate: "", current: false, description: "" });
+  const addEdu = () => appendEdu({ degree: "", institution: "", startDate: "", endDate: "", description: "" });
 
   if (loading) return <div className="skeleton h-64 rounded-2xl max-w-4xl" />;
 
@@ -90,34 +89,32 @@ export default function AboutPage() {
             </div>
           </div>
 
-          <div className="glass rounded-2xl p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-white">Skills</h3>
-              <button type="button" onClick={addSkill} className="flex items-center gap-1 text-xs text-[#8B5CF6] hover:text-[#A78BFA] transition-colors"><Plus size={13} /> Add Skill</button>
-            </div>
-            <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-              {skills.map((_: unknown, i: number) => (
-                <div key={i} className="flex items-center gap-3">
-                  <GripVertical size={14} className="text-[#3f3f46] flex-shrink-0" />
-                  <Input {...register(`skills.${i}.name`)} placeholder="Skill Name" className="flex-1" />
-                  <Input {...register(`skills.${i}.level`)} type="number" placeholder="%" className="w-20" min="0" max="100" />
-                  <select {...register(`skills.${i}.category`)} className="w-32 h-10 px-2 bg-white/5 border border-white/10 rounded-xl text-white text-sm outline-none">
-                    <option value="frontend">Frontend</option><option value="backend">Backend</option><option value="design">Design</option><option value="other">Other</option>
-                  </select>
-                  <button type="button" onClick={() => removeSkill(i)} className="text-red-400 hover:text-red-300"><Trash2 size={14} /></button>
+
+          {/* Skills → managed in its own dedicated section */}
+          <div className="glass rounded-2xl p-5 border border-[#8B5CF6]/20">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-[#8B5CF6]/20 flex items-center justify-center flex-shrink-0">
+                  <Zap size={15} className="text-[#8B5CF6]" />
                 </div>
-              ))}
+                <div>
+                  <p className="text-sm font-semibold text-white">Skills &amp; Tools</p>
+                  <p className="text-xs text-white/40 mt-0.5">Managed in the dedicated Skills section</p>
+                </div>
+              </div>
+              <a href="/skills" className="flex items-center gap-1.5 text-xs text-[#8B5CF6] hover:text-[#A78BFA] transition-colors font-medium">
+                Go to Skills <ArrowRight size={12} />
+              </a>
             </div>
           </div>
-
           <div className="glass rounded-2xl p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-white">Experience</h3>
               <button type="button" onClick={addExp} className="flex items-center gap-1 text-xs text-[#8B5CF6] hover:text-[#A78BFA] transition-colors"><Plus size={13} /> Add Exp</button>
             </div>
             <div className="space-y-4">
-              {experience.map((_: unknown, i: number) => (
-                <div key={i} className="p-4 rounded-xl border border-white/10 bg-white/3 space-y-3 relative">
+              {expFields.map((field, i) => (
+                <div key={field.id} className="p-4 rounded-xl border border-white/10 bg-white/3 space-y-3 relative">
                   <button type="button" onClick={() => removeExp(i)} className="absolute top-4 right-4 text-red-400 hover:text-red-300"><Trash2 size={14} /></button>
                   <div className="grid grid-cols-2 gap-3 pr-8">
                     <Field label="Job Title"><Input {...register(`experience.${i}.title`)} placeholder="Senior Dev" /></Field>
@@ -140,8 +137,8 @@ export default function AboutPage() {
               <button type="button" onClick={addEdu} className="flex items-center gap-1 text-xs text-[#8B5CF6] hover:text-[#A78BFA] transition-colors"><Plus size={13} /> Add Edu</button>
             </div>
             <div className="space-y-4">
-              {education.map((_: unknown, i: number) => (
-                <div key={i} className="p-4 rounded-xl border border-white/10 bg-white/3 space-y-3 relative">
+              {eduFields.map((field, i) => (
+                <div key={field.id} className="p-4 rounded-xl border border-white/10 bg-white/3 space-y-3 relative">
                   <button type="button" onClick={() => removeEdu(i)} className="absolute top-4 right-4 text-red-400 hover:text-red-300"><Trash2 size={14} /></button>
                   <div className="grid grid-cols-2 gap-3 pr-8">
                     <Field label="Degree"><Input {...register(`education.${i}.degree`)} placeholder="BSc Computer Science" /></Field>

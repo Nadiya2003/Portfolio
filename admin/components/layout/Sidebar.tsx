@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Layers, User, FolderOpen, Palette, Monitor,
   Code2, Video, PenTool, Image, MessageSquare, Phone, Settings,
   UserCircle, ChevronLeft, ChevronRight, Sparkles, LogOut,
-  Star, Mail, Layout
+  Star, Mail, Layout, Zap
 } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
@@ -19,6 +19,7 @@ const navItems = [
   { label: "Dashboard", href: "/", icon: LayoutDashboard },
   { label: "Hero Section", href: "/hero", icon: Layers },
   { label: "About Section", href: "/about", icon: User },
+  { label: "Skills", href: "/skills", icon: Zap },
   { label: "Services", href: "/services", icon: Sparkles },
   { type: "divider", label: "Portfolio" },
   { label: "All Projects", href: "/projects", icon: FolderOpen },

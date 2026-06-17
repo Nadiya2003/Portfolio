@@ -74,7 +74,7 @@ export default async function Home() {
       <About data={about} />
       <Services data={services} />
       <Portfolio projects={allProjects} />
-      <Skills data={about} />
+      <Skills />
       <Testimonials data={testimonials} />
       <Contact settings={settings} hero={hero} />
       <Footer settings={settings} hero={hero} />

@@ -11,7 +11,8 @@ import { usePathname } from "next/navigation";
 const pageTitles: Record<string, { title: string; subtitle: string }> = {
   "/": { title: "Dashboard", subtitle: "Welcome back! Here's what's happening." },
   "/hero": { title: "Hero Section", subtitle: "Manage your hero section content" },
-  "/about": { title: "About Section", subtitle: "Update your bio, skills & timeline" },
+  "/about": { title: "About Section", subtitle: "Update your bio & timeline" },
+  "/skills": { title: "Skills & Tools", subtitle: "Manage your skill categories and proficiency levels" },
   "/projects": { title: "Portfolio Projects", subtitle: "Manage all your portfolio projects" },
   "/graphic": { title: "Graphic Designs", subtitle: "Logo, flyer, banner & branding work" },
   "/uiux": { title: "UI/UX Designs", subtitle: "App designs, dashboards & case studies" },
