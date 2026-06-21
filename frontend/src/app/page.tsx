@@ -12,8 +12,11 @@ import { Contact } from '@/components/Contact';
 import { Footer } from '@/components/Footer';
 import { FloatingControls } from '@/components/FloatingControls';
 
-// Use explicit env var for production backend URL to avoid VERCEL_URL misdirection
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+// Automatically detect if we're on Vercel or local
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 
+  (process.env.VERCEL_URL || process.env.NEXT_PUBLIC_VERCEL_URL 
+    ? `https://${process.env.VERCEL_URL || process.env.NEXT_PUBLIC_VERCEL_URL}/_/backend`
+    : 'http://localhost:5000');
 
 const fetchAPI = async (endpoint: string) => {
   try {
