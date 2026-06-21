@@ -31,7 +31,7 @@ const connectDB = async () => {
     console.log('[DB] Initializing new MongoDB connection');
     cached.promise = mongoose.connect(uri, {
       bufferCommands: false,           // Fail fast instead of queuing commands
-      serverSelectionTimeoutMS: 10000, // 10s timeout for Atlas cold starts
+      serverSelectionTimeoutMS: 5000,  // 5s timeout (prevents Vercel 10s crash)
     }).then(mongooseInstance => {
       console.log(`[DB] MongoDB connected: ${mongooseInstance.connection.host} / ${mongooseInstance.connection.name}`);
       return mongooseInstance.connection;

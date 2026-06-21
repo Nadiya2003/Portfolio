@@ -21,6 +21,14 @@ app.use(async (req, res, next) => {
   }
 });
 
+// Vercel Rewrite Fix: Strip the `/_/backend` prefix so Express can match `/api/...` correctly
+app.use((req, res, next) => {
+  if (req.url.startsWith('/_/backend')) {
+    req.url = req.url.replace('/_/backend', '');
+  }
+  next();
+});
+
 // Middleware
 app.use(cors({
   origin: [
@@ -92,6 +100,13 @@ app.use((err, req, res, next) => {
   console.error('\n[Global Error]', err);
   res.status(500).json({ success: false, message: err.message || 'Internal Server Error', error: err });
 });
+
+// Catch-all 404 handler to prevent Vercel Serverless hanging
+app.use((req, res) => {
+  console.warn(`[404] Unmatched route: ${req.method} ${req.originalUrl}`);
+  res.status(404).json({ success: false, message: `Route not found: ${req.originalUrl}` });
+});
+
 
 // Vercel serverless functions require exporting the app instead of calling app.listen()
 // We only call app.listen() if we are running locally (e.g. via nodemon)
