@@ -12,22 +12,20 @@ import { Contact } from '@/components/Contact';
 import { Footer } from '@/components/Footer';
 import { FloatingControls } from '@/components/FloatingControls';
 
-// On Vercel with experimentalServices: backend is at /_/backend on the same domain
-// VERCEL_URL is auto-injected by Vercel at runtime (no https:// prefix, so we add it)
-const BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  (process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}/_/backend`
-    : 'http://localhost:5000');
+// Use explicit env var for production backend URL to avoid VERCEL_URL misdirection
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 const fetchAPI = async (endpoint: string) => {
   try {
     const res = await fetch(`${BASE_URL}/api/${endpoint}`, { cache: 'no-store' });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.error(`[API] Failed to fetch ${endpoint} - Status: ${res.status}`);
+      return null;
+    }
     const json = await res.json();
     return json.data;
-  } catch (error) {
-    console.error(`Failed to fetch ${endpoint}:`, error);
+  } catch (error: any) {
+    console.error(`[API] Network error fetching ${endpoint}:`, error.message);
     return null;
   }
 };

@@ -3,8 +3,10 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
 
-// Connect to database
-connectDB();
+// Connect to database (non-fatal — let the server start even if DB is temporarily unavailable)
+connectDB().catch((err) => {
+  console.error('[STARTUP] DB connection error:', err.message);
+});
 
 // Initialize Cloudinary
 const { initCloudinary } = require('./config/cloudinary');
@@ -33,6 +35,27 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Health check
 app.get('/', (req, res) => res.send('Portfolio Backend API is running'));
 app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date() }));
+
+// Debug endpoint — verify env vars are loaded (safe: shows keys, not values)
+app.get('/api/debug', (req, res) => {
+  const mongoose = require('mongoose');
+  const dbState = ['disconnected', 'connected', 'connecting', 'disconnecting'];
+  res.json({
+    status: 'ok',
+    node_env: process.env.NODE_ENV || 'not set',
+    db_state: dbState[mongoose.connection.readyState] || 'unknown',
+    db_name: mongoose.connection.name || 'not connected',
+    env_vars_present: {
+      MONGODB_URI:           !!process.env.MONGODB_URI,
+      JWT_SECRET:            !!process.env.JWT_SECRET,
+      CLOUDINARY_CLOUD_NAME: !!process.env.CLOUDINARY_CLOUD_NAME,
+      CLOUDINARY_API_KEY:    !!process.env.CLOUDINARY_API_KEY,
+      CLOUDINARY_API_SECRET: !!process.env.CLOUDINARY_API_SECRET,
+      FRONTEND_URL:          process.env.FRONTEND_URL || 'not set',
+      ADMIN_URL:             process.env.ADMIN_URL || 'not set',
+    },
+  });
+});
 
 // Routes
 const authRoutes = require('./routes/authRoutes');
@@ -65,5 +88,6 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(port, () => {
-  console.log(`\n\x1b[36m🚀 Server running on port ${port}\x1b[0m`);
+  console.log(`[SERVER] Running on port ${port} | NODE_ENV=${process.env.NODE_ENV || 'not set'}`);
 });
+

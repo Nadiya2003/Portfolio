@@ -1,23 +1,32 @@
 const mongoose = require('mongoose');
 
 const connectDB = async () => {
+  const uri = process.env.MONGODB_URI;
+
+  if (!uri) {
+    throw new Error(
+      '[DB] MONGODB_URI is not set. Add it to your environment variables in Vercel dashboard.'
+    );
+  }
+
+  // Reuse existing connection (important for serverless warm starts)
+  if (mongoose.connection.readyState >= 1) {
+    console.log('[DB] Reusing existing MongoDB connection');
+    return;
+  }
+
   try {
-    if (!process.env.MONGODB_URI || process.env.MONGODB_URI.includes('<db_password>')) {
-      console.warn('\x1b[33m⚠️  MONGODB_URI is either missing or contains the <db_password> placeholder. Please update your .env file with the actual password.\x1b[0m');
-    }
+    const conn = await mongoose.connect(uri, {
+      bufferCommands: false,     // Fail fast instead of queuing commands
+      serverSelectionTimeoutMS: 10000, // 10s timeout for Atlas cold starts
+    });
 
-    const conn = await mongoose.connect(process.env.MONGODB_URI);
-    const date = new Date().toISOString().replace('T', ' ').substring(0, 19);
-
-    console.log('\x1b[32m✅ MongoDB Connected Successfully\x1b[0m');
-    console.log(`\x1b[36m📦 Database:\x1b[0m ${conn.connection.name}`);
-    console.log(`\x1b[36m🌐 Host:\x1b[0m ${conn.connection.host}`);
-    console.log(`\x1b[36m⏰ Connected at:\x1b[0m ${date}\n`);
+    console.log(`[DB] MongoDB connected: ${conn.connection.host} / ${conn.connection.name}`);
   } catch (error) {
-    console.error('\x1b[31m❌ MongoDB Connection Failed\x1b[0m');
-    console.error(`\x1b[31m${error.message}\x1b[0m\n`);
-    process.exit(1);
+    console.error('[DB] MongoDB connection failed:', error.message);
+    throw error; // Let the caller (index.js) handle it — do NOT process.exit in serverless
   }
 };
 
 module.exports = connectDB;
+
