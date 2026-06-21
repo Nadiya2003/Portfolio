@@ -12,16 +12,20 @@ import { Contact } from '@/components/Contact';
 import { Footer } from '@/components/Footer';
 import { FloatingControls } from '@/components/FloatingControls';
 
+// Use explicit env var for production backend URL to avoid VERCEL_URL misdirection
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 const fetchAPI = async (endpoint: string) => {
   try {
     const res = await fetch(`${BASE_URL}/api/${endpoint}`, { cache: 'no-store' });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.error(`[API] Failed to fetch ${endpoint} - Status: ${res.status}`);
+      return null;
+    }
     const json = await res.json();
     return json.data;
-  } catch (error) {
-    console.error(`Failed to fetch ${endpoint}:`, error);
+  } catch (error: any) {
+    console.error(`[API] Network error fetching ${endpoint}:`, error.message);
     return null;
   }
 };

@@ -3,15 +3,23 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
 
-// Connect to database
-connectDB();
+const app = express();
+const port = process.env.PORT || 5000;
 
 // Initialize Cloudinary
 const { initCloudinary } = require('./config/cloudinary');
 initCloudinary();
 
-const app = express();
-const port = process.env.PORT || 5000;
+// Connect to DB via middleware for serverless (ensures DB is ready before any route fires)
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error('[REQUEST] DB connection failed:', err.message);
+    res.status(500).json({ success: false, message: 'Database connection failed' });
+  }
+});
 
 // Middleware
 app.use(cors({
@@ -33,6 +41,27 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Health check
 app.get('/', (req, res) => res.send('Portfolio Backend API is running'));
 app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date() }));
+
+// Debug endpoint — verify env vars are loaded (safe: shows keys, not values)
+app.get('/api/debug', (req, res) => {
+  const mongoose = require('mongoose');
+  const dbState = ['disconnected', 'connected', 'connecting', 'disconnecting'];
+  res.json({
+    status: 'ok',
+    node_env: process.env.NODE_ENV || 'not set',
+    db_state: dbState[mongoose.connection.readyState] || 'unknown',
+    db_name: mongoose.connection.name || 'not connected',
+    env_vars_present: {
+      MONGODB_URI:           !!process.env.MONGODB_URI,
+      JWT_SECRET:            !!process.env.JWT_SECRET,
+      CLOUDINARY_CLOUD_NAME: !!process.env.CLOUDINARY_CLOUD_NAME,
+      CLOUDINARY_API_KEY:    !!process.env.CLOUDINARY_API_KEY,
+      CLOUDINARY_API_SECRET: !!process.env.CLOUDINARY_API_SECRET,
+      FRONTEND_URL:          process.env.FRONTEND_URL || 'not set',
+      ADMIN_URL:             process.env.ADMIN_URL || 'not set',
+    },
+  });
+});
 
 // Routes
 const authRoutes = require('./routes/authRoutes');
@@ -64,6 +93,14 @@ app.use((err, req, res, next) => {
   res.status(500).json({ success: false, message: err.message || 'Internal Server Error', error: err });
 });
 
-app.listen(port, () => {
-  console.log(`\n\x1b[36m🚀 Server running on port ${port}\x1b[0m`);
-});
+// Vercel serverless functions require exporting the app instead of calling app.listen()
+// We only call app.listen() if we are running locally (e.g. via nodemon)
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  app.listen(port, () => {
+    console.log(`[SERVER] Running locally on port ${port} | NODE_ENV=${process.env.NODE_ENV || 'not set'}`);
+  });
+}
+
+// Export for Vercel Serverless
+module.exports = app;
+
