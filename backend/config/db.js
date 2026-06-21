@@ -1,5 +1,11 @@
 const mongoose = require('mongoose');
 
+// Global cache for serverless environments
+let cached = global.mongoose;
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
+
 const connectDB = async () => {
   const uri = process.env.MONGODB_URI;
 
@@ -9,22 +15,38 @@ const connectDB = async () => {
     );
   }
 
-  // Reuse existing connection (important for serverless warm starts)
+  // Reuse existing connection from global cache (important for serverless warm starts)
+  if (cached.conn) {
+    console.log('[DB] Reusing existing MongoDB connection from cache');
+    return cached.conn;
+  }
+
   if (mongoose.connection.readyState >= 1) {
-    console.log('[DB] Reusing existing MongoDB connection');
-    return;
+    console.log('[DB] Reusing existing mongoose default connection');
+    cached.conn = mongoose.connection;
+    return cached.conn;
+  }
+
+  if (!cached.promise) {
+    console.log('[DB] Initializing new MongoDB connection');
+    cached.promise = mongoose.connect(uri, {
+      bufferCommands: false,           // Fail fast instead of queuing commands
+      serverSelectionTimeoutMS: 10000, // 10s timeout for Atlas cold starts
+    }).then(mongooseInstance => {
+      console.log(`[DB] MongoDB connected: ${mongooseInstance.connection.host} / ${mongooseInstance.connection.name}`);
+      return mongooseInstance.connection;
+    }).catch(error => {
+      console.error('[DB] MongoDB connection failed:', error.message);
+      cached.promise = null; // Reset promise so next attempt can try again
+      throw error; // Let the caller (index.js) handle it — do NOT process.exit in serverless
+    });
   }
 
   try {
-    const conn = await mongoose.connect(uri, {
-      bufferCommands: false,     // Fail fast instead of queuing commands
-      serverSelectionTimeoutMS: 10000, // 10s timeout for Atlas cold starts
-    });
-
-    console.log(`[DB] MongoDB connected: ${conn.connection.host} / ${conn.connection.name}`);
+    cached.conn = await cached.promise;
+    return cached.conn;
   } catch (error) {
-    console.error('[DB] MongoDB connection failed:', error.message);
-    throw error; // Let the caller (index.js) handle it — do NOT process.exit in serverless
+    throw error;
   }
 };
 

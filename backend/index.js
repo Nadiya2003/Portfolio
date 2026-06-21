@@ -87,7 +87,14 @@ app.use((err, req, res, next) => {
   res.status(500).json({ success: false, message: err.message || 'Internal Server Error', error: err });
 });
 
-app.listen(port, () => {
-  console.log(`[SERVER] Running on port ${port} | NODE_ENV=${process.env.NODE_ENV || 'not set'}`);
-});
+// Vercel serverless functions require exporting the app instead of calling app.listen()
+// We only call app.listen() if we are running locally (e.g. via nodemon)
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  app.listen(port, () => {
+    console.log(`[SERVER] Running locally on port ${port} | NODE_ENV=${process.env.NODE_ENV || 'not set'}`);
+  });
+}
+
+// Export for Vercel Serverless
+module.exports = app;
 
