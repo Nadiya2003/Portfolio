@@ -12,7 +12,13 @@ import { Contact } from '@/components/Contact';
 import { Footer } from '@/components/Footer';
 import { FloatingControls } from '@/components/FloatingControls';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+// On Vercel with experimentalServices: backend is at /_/backend on the same domain
+// VERCEL_URL is auto-injected by Vercel at runtime (no https:// prefix, so we add it)
+const BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  (process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}/_/backend`
+    : 'http://localhost:5000');
 
 const fetchAPI = async (endpoint: string) => {
   try {
