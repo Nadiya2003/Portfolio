@@ -96,8 +96,13 @@ export function Skills() {
   const [categories, setCategories] = useState<any[]>([]);
 
   useEffect(() => {
-    const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-    fetch(`${apiBase}/skills`)
+    // Automatically detect if we're on Vercel or local
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 
+      (process.env.NEXT_PUBLIC_VERCEL_URL 
+        ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/_/backend`
+        : 'http://localhost:5000');
+
+    fetch(`${baseUrl}/api/skills`)
       .then((r) => r.json())
       .then((res) => {
         if (res.success && res.data?.categories) {
