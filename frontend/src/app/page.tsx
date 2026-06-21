@@ -12,9 +12,11 @@ import { Contact } from '@/components/Contact';
 import { Footer } from '@/components/Footer';
 import { FloatingControls } from '@/components/FloatingControls';
 
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
 const fetchAPI = async (endpoint: string) => {
   try {
-    const res = await fetch(`http://localhost:5000/api/${endpoint}`, { cache: 'no-store' });
+    const res = await fetch(`${BASE_URL}/api/${endpoint}`, { cache: 'no-store' });
     if (!res.ok) return null;
     const json = await res.json();
     return json.data;
