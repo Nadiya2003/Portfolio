@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/mongodb';
 import Contact from '@/models/Contact';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();

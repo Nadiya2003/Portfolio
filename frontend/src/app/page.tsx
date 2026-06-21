@@ -12,6 +12,8 @@ import { Contact } from '@/components/Contact';
 import { Footer } from '@/components/Footer';
 import { FloatingControls } from '@/components/FloatingControls';
 
+export const dynamic = 'force-dynamic';
+
 // Automatically detect if we're on Vercel or local
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 
   (process.env.VERCEL_URL || process.env.NEXT_PUBLIC_VERCEL_URL 
@@ -20,7 +22,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL ||
 
 const fetchAPI = async (endpoint: string) => {
   try {
-    const res = await fetch(`${BASE_URL}/api/${endpoint}`, { cache: 'no-store' });
+    const res = await fetch(`${BASE_URL}/api/${endpoint}`);
     if (!res.ok) {
       console.error(`[API] Failed to fetch ${endpoint} - Status: ${res.status}`);
       return null;
