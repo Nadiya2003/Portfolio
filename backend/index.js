@@ -3,17 +3,23 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
 
-// Connect to database (non-fatal — let the server start even if DB is temporarily unavailable)
-connectDB().catch((err) => {
-  console.error('[STARTUP] DB connection error:', err.message);
-});
+const app = express();
+const port = process.env.PORT || 5000;
 
 // Initialize Cloudinary
 const { initCloudinary } = require('./config/cloudinary');
 initCloudinary();
 
-const app = express();
-const port = process.env.PORT || 5000;
+// Connect to DB via middleware for serverless (ensures DB is ready before any route fires)
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error('[REQUEST] DB connection failed:', err.message);
+    res.status(500).json({ success: false, message: 'Database connection failed' });
+  }
+});
 
 // Middleware
 app.use(cors({
