@@ -59,8 +59,8 @@ app.use(cors({
 }));
 
 // Explicitly handle OPTIONS preflight for all routes
-// (Required on Vercel serverless — preflights don't go through keep-alive middleware)
-app.options('*', cors());
+// Express 5 requires '/{*path}' — the old '*' wildcard is not valid in Express 5
+app.options('/{*path}', cors());
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
