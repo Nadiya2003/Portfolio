@@ -30,16 +30,38 @@ app.use((req, res, next) => {
   next();
 });
 
-// Middleware
+// ── CORS ──────────────────────────────────────────────────────────────────────
+// Use a function-based origin validator so we handle:
+//   - exact matches (with or without trailing slash)
+//   - localhost in any dev environment
+//   - FRONTEND_URL / ADMIN_URL set via Vercel env vars
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://localhost:5173',
+  process.env.FRONTEND_URL,
+  process.env.ADMIN_URL,
+].filter(Boolean).map((o) => o.replace(/\/$/, '')); // strip trailing slashes
+
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    process.env.FRONTEND_URL,
-    process.env.ADMIN_URL,
-  ].filter(Boolean),
+  origin: (origin, callback) => {
+    // Allow server-to-server requests (no origin header) and all allowed origins
+    if (!origin || allowedOrigins.includes(origin.replace(/\/$/, ''))) {
+      callback(null, true);
+    } else {
+      console.warn(`[CORS] Blocked origin: ${origin}`);
+      callback(new Error(`CORS: origin ${origin} not allowed`));
+    }
+  },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
+
+// Explicitly handle OPTIONS preflight for all routes
+// (Required on Vercel serverless — preflights don't go through keep-alive middleware)
+app.options('*', cors());
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
