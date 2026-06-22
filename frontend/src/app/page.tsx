@@ -22,11 +22,31 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL ||
 
 const fetchAPI = async (endpoint: string) => {
   try {
-    const res = await fetch(`${BASE_URL}/api/${endpoint}`);
+    const res = await fetch(`${BASE_URL}/api/${endpoint}`, {
+      // Add cache: 'no-store' if you want to bypass Next.js caching completely
+      next: { revalidate: 60 } 
+    });
+    
     if (!res.ok) {
-      console.error(`[API] Failed to fetch ${endpoint} - Status: ${res.status}`);
+      // Read the response text to see if it's an HTML page (like Vercel SSO)
+      const errorText = await res.text();
+      const isVercelSSO = errorText.includes('Vercel Authentication') || errorText.includes('vercel.com/sso-api');
+      
+      if (res.status === 401 && isVercelSSO) {
+        console.error(`[API] FATAL: Vercel Authentication (SSO) blocked the request to ${endpoint}. Your NEXT_PUBLIC_API_URL is pointing to a protected preview URL instead of the production URL.`);
+      } else {
+        console.error(`[API] Failed to fetch ${endpoint} - Status: ${res.status}`);
+      }
       return null;
     }
+    
+    // Ensure we actually got JSON before parsing
+    const contentType = res.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      console.error(`[API] Expected JSON but received ${contentType} for ${endpoint}. Possible Vercel routing issue.`);
+      return null;
+    }
+
     const json = await res.json();
     return json.data;
   } catch (error: any) {
