@@ -49,6 +49,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Health check
 app.get('/', (req, res) => res.send('Portfolio Backend API is running'));
 app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date() }));
+app.get('/api/test', (req, res) => res.json({ success: true, message: 'API is working correctly', timestamp: new Date() }));
 
 // Debug endpoint — verify env vars are loaded (safe: shows keys, not values)
 app.get('/api/debug', (req, res) => {
