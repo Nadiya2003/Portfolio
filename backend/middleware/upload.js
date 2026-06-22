@@ -1,8 +1,14 @@
 /**
  * middleware/upload.js
  * Production-grade Multer middleware.
- * Uses CloudinaryStorage if configured, otherwise falls back to local disk storage
- * so the frontend can still display images during local development.
+ *
+ * Storage strategy:
+ *  - Cloudinary (preferred)  → used whenever CLOUDINARY_* env vars are set.
+ *  - /tmp/uploads            → Vercel serverless fallback (writable temp dir).
+ *  - ./uploads               → local development fallback only.
+ *
+ * NOTE: Vercel's /var/task filesystem is read-only at runtime.
+ *       We NEVER attempt mkdirSync inside the project root on Vercel.
  */
 
 'use strict';
@@ -13,11 +19,22 @@ const fs = require('fs');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const { cloudinary, isConfigured } = require('../config/cloudinary');
 
-// Ensure local uploads directory exists
-const localUploadsDir = path.join(__dirname, '..', 'uploads');
-if (!fs.existsSync(localUploadsDir)) {
-  fs.mkdirSync(localUploadsDir, { recursive: true });
-}
+// ── Local uploads dir ─────────────────────────────────────────────────────────
+// On Vercel (VERCEL env is truthy) the project root is read-only, so we write
+// to /tmp instead.  In local dev we keep the familiar ./uploads folder.
+const isVercel = !!(process.env.VERCEL || process.env.VERCEL_ENV);
+const localUploadsDir = isVercel
+  ? path.join('/tmp', 'uploads')                   // writable on Vercel Lambda
+  : path.join(__dirname, '..', 'uploads');          // normal local dev path
+
+// Create the directory only when we'll actually use it (i.e. no Cloudinary).
+// We defer creation to request-time inside diskStorage.destination so the
+// module can be safely required without hitting the filesystem on Vercel.
+const ensureLocalDir = () => {
+  if (!fs.existsSync(localUploadsDir)) {
+    fs.mkdirSync(localUploadsDir, { recursive: true });
+  }
+};
 
 /**
  * Build storage instance.
@@ -40,9 +57,12 @@ const createStorage = (folder) => {
       },
     });
   } else {
-    // Local Disk Storage Fallback
+    // Local Disk Storage Fallback (local dev only; /tmp/uploads on Vercel)
     return multer.diskStorage({
-      destination: (req, file, cb) => cb(null, localUploadsDir),
+      destination: (req, file, cb) => {
+        ensureLocalDir(); // safe: called per-request, not at require() time
+        cb(null, localUploadsDir);
+      },
       filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
         cb(null, folder + '-' + uniqueSuffix + path.extname(file.originalname));
