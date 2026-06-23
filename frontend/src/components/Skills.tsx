@@ -1,9 +1,11 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { SectionHeading } from './ui/SectionHeading';
 import { GlassCard } from './ui/GlassCard';
+import { twMerge } from 'tailwind-merge';
 
 // ─── Progress Ring ────────────────────────────────────────────────────────────
 interface ProgressRingProps {
@@ -91,14 +93,96 @@ const COLOR_PROFILES = [
   },
 ];
 
+// ─── Mobile Carousel ─────────────────────────────────────────────────────────
+function SkillsCarousel({ children, count, accentClass }: { children: React.ReactNode[]; count: number; accentClass: string }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [activeIdx, setActiveIdx] = useState(0);
+
+  const scrollTo = (idx: number) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const child = el.children[idx] as HTMLElement;
+    if (child) child.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    setActiveIdx(idx);
+  };
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const observers: IntersectionObserver[] = [];
+    Array.from(el.children).forEach((child, idx) => {
+      const obs = new IntersectionObserver(
+        ([entry]) => { if (entry.intersectionRatio > 0.5) setActiveIdx(idx); },
+        { root: el, threshold: 0.5 }
+      );
+      obs.observe(child);
+      observers.push(obs);
+    });
+    return () => observers.forEach(o => o.disconnect());
+  }, [count]);
+
+  return (
+    <div className="relative">
+      <div
+        ref={scrollRef}
+        className="flex gap-4 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-4 px-1"
+      >
+        {React.Children.map(children, (child, idx) => (
+          <div key={idx} className="snap-center flex-shrink-0 w-[85vw] max-w-[340px]">
+            {child}
+          </div>
+        ))}
+      </div>
+
+      {/* Dots */}
+      {count > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-3">
+          {Array.from({ length: count }).map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => scrollTo(idx)}
+              className={twMerge(
+                'transition-all duration-300 rounded-full',
+                idx === activeIdx
+                  ? `w-5 h-1.5 ${accentClass}`
+                  : 'w-1.5 h-1.5 bg-white/20'
+              )}
+              aria-label={`Skill category ${idx + 1}`}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Arrows */}
+      {count > 1 && (
+        <>
+          <button
+            onClick={() => scrollTo(Math.max(0, activeIdx - 1))}
+            disabled={activeIdx === 0}
+            className="absolute left-0 top-[42%] -translate-y-1/2 -translate-x-1 z-10 w-8 h-8 rounded-full bg-dark-900/80 backdrop-blur border border-white/10 flex items-center justify-center text-white/60 disabled:opacity-0 transition-opacity"
+          >
+            <ChevronLeft size={16} />
+          </button>
+          <button
+            onClick={() => scrollTo(Math.min(count - 1, activeIdx + 1))}
+            disabled={activeIdx === count - 1}
+            className="absolute right-0 top-[42%] -translate-y-1/2 translate-x-1 z-10 w-8 h-8 rounded-full bg-dark-900/80 backdrop-blur border border-white/10 flex items-center justify-center text-white/60 disabled:opacity-0 transition-opacity"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 export function Skills() {
   const [categories, setCategories] = useState<any[]>([]);
 
   useEffect(() => {
-    // Automatically detect if we're on Vercel or local
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 
-      (process.env.NEXT_PUBLIC_VERCEL_URL 
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL ||
+      (process.env.NEXT_PUBLIC_VERCEL_URL
         ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/_/backend`
         : 'http://localhost:5000');
 
@@ -114,77 +198,94 @@ export function Skills() {
 
   if (categories.length === 0) return null;
 
+  const renderCategoryCard = (cat: any, index: number) => {
+    const profile = COLOR_PROFILES[index % COLOR_PROFILES.length];
+    const tools: any[] = cat.tools || [];
+    const style: 'rings' | 'bars' = cat.displayStyle === 'bars' ? 'bars' : 'rings';
+
+    return (
+      <GlassCard key={cat._id || cat.categoryName} className="p-7" hoverEffect glowColor={profile.name}>
+        <h3 className="text-xl font-display font-bold text-white mb-7 flex items-center gap-3">
+          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${profile.dot}`} />
+          {cat.categoryName}
+        </h3>
+
+        {style === 'rings' ? (
+          <div className="grid grid-cols-2 gap-5">
+            {tools.map((tool: any, ti: number) => (
+              <motion.div
+                key={`${tool.name}-${ti}`}
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: ti * 0.08 }}
+                className="flex flex-col items-center gap-3"
+              >
+                <ProgressRing
+                  radius={44}
+                  stroke={4}
+                  progress={Number(tool.level) || 0}
+                  colorClass={profile.ring}
+                />
+                <span className="text-sm font-medium text-white/80 text-center leading-tight">
+                  {tool.name}
+                </span>
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {tools.map((tool: any, ti: number) => (
+              <motion.div
+                key={`${tool.name}-${ti}`}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: ti * 0.08 }}
+              >
+                <div className="flex justify-between text-sm mb-1.5">
+                  <span className="text-white/80 font-medium">{tool.name}</span>
+                  <span className={`font-bold ${profile.text}`}>{tool.level}%</span>
+                </div>
+                <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    whileInView={{ width: `${tool.level}%` }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 1, delay: ti * 0.08 + 0.2, ease: 'easeOut' }}
+                    className={`h-full ${profile.bar} rounded-full`}
+                  />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </GlassCard>
+    );
+  };
+
   return (
     <section id="skills" className="py-24 relative">
       <div className="container mx-auto px-6 md:px-12">
         <SectionHeading title="Technical Arsenal" subtitle="Skills & Tools" color="purple" />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {categories.map((cat: any, index: number) => {
-            const profile = COLOR_PROFILES[index % COLOR_PROFILES.length];
-            const tools: any[] = cat.tools || [];
-            const style: 'rings' | 'bars' = cat.displayStyle === 'bars' ? 'bars' : 'rings';
+        {/* ── Desktop Grid (md+) ── */}
+        <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-8">
+          {categories.map((cat: any, index: number) => renderCategoryCard(cat, index))}
+        </div>
 
-            return (
-              <GlassCard key={cat._id || cat.categoryName} className="p-8" hoverEffect glowColor={profile.name}>
-                <h3 className="text-xl font-display font-bold text-white mb-8 flex items-center gap-3">
-                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${profile.dot}`} />
-                  {cat.categoryName}
-                </h3>
-
-                {style === 'rings' ? (
-                  <div className="grid grid-cols-2 gap-6">
-                    {tools.map((tool: any, ti: number) => (
-                      <motion.div
-                        key={`${tool.name}-${ti}`}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: ti * 0.08 }}
-                        className="flex flex-col items-center gap-3"
-                      >
-                        <ProgressRing
-                          radius={44}
-                          stroke={4}
-                          progress={Number(tool.level) || 0}
-                          colorClass={profile.ring}
-                        />
-                        <span className="text-sm font-medium text-white/80 text-center leading-tight">
-                          {tool.name}
-                        </span>
-                      </motion.div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="space-y-5">
-                    {tools.map((tool: any, ti: number) => (
-                      <motion.div
-                        key={`${tool.name}-${ti}`}
-                        initial={{ opacity: 0, x: -20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: ti * 0.08 }}
-                      >
-                        <div className="flex justify-between text-sm mb-2">
-                          <span className="text-white/80 font-medium">{tool.name}</span>
-                          <span className={`font-bold ${profile.text}`}>{tool.level}%</span>
-                        </div>
-                        <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            whileInView={{ width: `${tool.level}%` }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 1, delay: ti * 0.08 + 0.2, ease: 'easeOut' }}
-                            className={`h-full ${profile.bar} rounded-full`}
-                          />
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
-              </GlassCard>
-            );
-          })}
+        {/* ── Mobile Carousel (< md) ── */}
+        <div className="md:hidden">
+          <SkillsCarousel
+            count={categories.length}
+            accentClass="bg-neon-purple shadow-[0_0_6px_rgba(168,85,247,0.7)]"
+          >
+            {categories.map((cat: any, index: number) => (
+              <div key={cat._id || cat.categoryName}>
+                {renderCategoryCard(cat, index)}
+              </div>
+            ))}
+          </SkillsCarousel>
         </div>
       </div>
     </section>

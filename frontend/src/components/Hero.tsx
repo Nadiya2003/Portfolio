@@ -74,7 +74,7 @@ export function Hero({ data }: { data?: any }) {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="text-lg md:text-xl text-white/60 max-w-2xl mb-10 leading-relaxed"
+              className="text-lg md:text-xl text-white/60 max-w-2xl mb-10 leading-relaxed text-justify md:text-left"
             >
               {data?.bio || "I bridge the gap between aesthetics and engineering."}
             </motion.p>

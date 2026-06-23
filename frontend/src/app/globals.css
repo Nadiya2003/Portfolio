@@ -88,3 +88,21 @@ input:-webkit-autofill:active {
   -webkit-text-fill-color: white !important;
   transition: background-color 5000s ease-in-out 0s;
 }
+
+/* Mobile carousel: hardware-accelerated snap scroll */
+.mobile-carousel-scroll {
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x;
+}
+
+/* Dot indicator active state glow variants */
+.dot-blue   { background: var(--neon-blue);   box-shadow: 0 0 6px rgba(59,130,246,0.7); }
+.dot-purple { background: var(--neon-purple); box-shadow: 0 0 6px rgba(168,85,247,0.7); }
+.dot-cyan   { background: var(--neon-cyan);   box-shadow: 0 0 6px rgba(34,211,238,0.7); }
+
+/* Better touch target for mobile nav filter pills */
+@media (max-width: 767px) {
+  .filter-pill { min-height: 36px; }
+}

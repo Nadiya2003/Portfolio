@@ -67,7 +67,7 @@ export function About({ data }: { data?: any }) {
                           {item.degree}
                         </h4>
                         <h5 className="text-white/50 text-sm mb-3">{item.institution}</h5>
-                        <p className="text-white/70 text-sm leading-relaxed">
+                        <p className="text-white/70 text-sm leading-relaxed text-justify">
                           {item.description}
                         </p>
                       </GlassCard>
@@ -93,7 +93,7 @@ export function About({ data }: { data?: any }) {
               viewport={{ once: true }}
               className="prose prose-invert prose-lg max-w-none mb-12"
             >
-              <p className="text-white/70 leading-relaxed text-lg">{data?.description}</p>
+              <p className="text-white/70 leading-relaxed text-lg text-justify">{data?.description}</p>
             </motion.div>
 
             {/* Experience Timeline */}
@@ -123,7 +123,7 @@ export function About({ data }: { data?: any }) {
                         {item.title}
                       </h4>
                       <h5 className="text-white/50 text-sm mb-3">{item.company}</h5>
-                      <p className="text-white/70 text-sm leading-relaxed">
+                      <p className="text-white/70 text-sm leading-relaxed text-justify">
                         {item.description}
                       </p>
                     </GlassCard>
