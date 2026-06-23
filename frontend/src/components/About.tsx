@@ -11,8 +11,8 @@ export function About({ data }: { data?: any }) {
 
   return (
     <section id="about" className="py-24 relative">
-      <div className="container mx-auto px-6 md:px-12">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+      <div className="container mx-auto px-5 md:px-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-start">
           {/* Left: Portrait */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
@@ -21,7 +21,7 @@ export function About({ data }: { data?: any }) {
             className="lg:col-span-5 relative"
           >
             <GlassCard className="p-2 relative z-10" glowColor="purple" hoverEffect>
-              <div className="relative rounded-xl overflow-hidden aspect-[4/5] bg-dark-800">
+              <div className="relative rounded-xl overflow-hidden aspect-[3/4] md:aspect-[4/5] bg-dark-800 max-h-[50vh] md:max-h-none">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 {data?.profileImage ? (
                   <img
@@ -93,7 +93,7 @@ export function About({ data }: { data?: any }) {
               viewport={{ once: true }}
               className="prose prose-invert prose-lg max-w-none mb-12"
             >
-              <p className="text-white/70 leading-relaxed text-lg text-justify">{data?.description}</p>
+              <p className="text-white/70 leading-relaxed text-base md:text-lg text-justify">{data?.description}</p>
             </motion.div>
 
             {/* Experience Timeline */}

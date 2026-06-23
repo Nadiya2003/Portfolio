@@ -99,7 +99,7 @@ export default async function Home() {
   return (
     <Layout>
       {settings?.favicon && <FaviconUpdater faviconUrl={settings.favicon} />}
-      <IntroSequence />
+      <IntroSequence lines={hero?.introLines} />
       <Navigation settings={settings} />
       <Hero data={hero} />
       <About data={about} />

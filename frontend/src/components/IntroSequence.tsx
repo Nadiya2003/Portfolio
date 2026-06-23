@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { twMerge } from 'tailwind-merge';
 
 const PARTICLE_DATA = Array.from({ length: 18 }).map((_, i) => ({
   id: i,
@@ -10,7 +11,7 @@ const PARTICLE_DATA = Array.from({ length: 18 }).map((_, i) => ({
   delay: Math.random() * 2,
 }));
 
-export function IntroSequence() {
+export function IntroSequence({ lines }: { lines?: string[] }) {
   const [isVisible, setIsVisible] = useState(true);
   // Store viewport height safely (SSR returns 0, real value set in effect)
   const [viewportHeight, setViewportHeight] = useState(0);
@@ -133,15 +134,25 @@ export function IntroSequence() {
               </defs>
             </motion.svg>
 
-            {/* Morphing Name */}
-            <motion.h1
-              initial={{ opacity: 0, y: 20, filter: 'blur(12px)' }}
-              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-              transition={{ delay: 1.3, duration: 0.9 }}
-              className="text-4xl md:text-6xl font-display font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white to-white/50 text-center"
-            >
-              Nadiya
-            </motion.h1>
+            {/* Morphing Lines */}
+            <div className="flex flex-col items-center gap-2 mt-4 text-center">
+              {(lines && lines.length > 0 ? lines : ["HELLO", "I'M NADEESHA", "GRAPHIC DESIGNER & DEVELOPER"]).map((line, i) => (
+                <motion.h1
+                  key={i}
+                  initial={{ opacity: 0, y: 20, filter: 'blur(12px)' }}
+                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                  transition={{ delay: 1.3 + (i * 0.4), duration: 0.9 }}
+                  className={twMerge(
+                    "font-display tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white to-white/50 text-center",
+                    i === 0 ? "text-xl md:text-2xl font-medium" : 
+                    i === 1 ? "text-4xl md:text-6xl font-bold" : 
+                    "text-lg md:text-xl font-light text-neon-blue mt-2"
+                  )}
+                >
+                  {line}
+                </motion.h1>
+              ))}
+            </div>
 
             <motion.div
               initial={{ scaleX: 0 }}

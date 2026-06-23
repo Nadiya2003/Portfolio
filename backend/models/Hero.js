@@ -21,17 +21,13 @@ const heroSchema = new mongoose.Schema(
         suffix: String,
       },
     ],
-    socials: {
-      email: { type: String, default: '' },
-      phone: { type: String, default: '' },
-      whatsapp: { type: String, default: '' },
-      linkedin: { type: String, default: '' },
-      github: { type: String, default: '' },
-      behance: { type: String, default: '' },
-      dribbble: { type: String, default: '' },
-      instagram: { type: String, default: '' },
-      facebook: { type: String, default: '' },
-      twitter: { type: String, default: '' },
+    introLines: {
+      type: [String],
+      default: [
+        "HELLO",
+        "I'M NADEESHA",
+        "GRAPHIC DESIGNER & DEVELOPER"
+      ]
     },
     isActive: { type: Boolean, default: true },
   },

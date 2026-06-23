@@ -18,10 +18,10 @@ const updateHero = async (req, res) => {
     let hero = await Hero.findOne();
     if (!hero) hero = new Hero();
 
-    const fields = ['fullName', 'title', 'subtitle', 'bio', 'ctaText', 'ctaSecondaryText', 'stats', 'socials'];
+    const fields = ['fullName', 'title', 'subtitle', 'bio', 'ctaText', 'ctaSecondaryText', 'stats', 'introLines'];
     fields.forEach((f) => { 
       if (req.body[f] !== undefined) {
-        if ((f === 'stats' || f === 'socials') && typeof req.body[f] === 'string') {
+        if ((f === 'stats' || f === 'introLines') && typeof req.body[f] === 'string') {
           try { hero[f] = JSON.parse(req.body[f]); } catch(e) { hero[f] = req.body[f]; }
         } else {
           hero[f] = req.body[f];

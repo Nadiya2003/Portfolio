@@ -106,3 +106,18 @@ input:-webkit-autofill:active {
 @media (max-width: 767px) {
   .filter-pill { min-height: 36px; }
 }
+
+/* iOS safe area support (bottom sheet / notch phones) */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+
+/* Smooth tap highlight for mobile */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Section heading mobile scaling */
+@media (max-width: 640px) {
+  section { padding-top: 4rem; padding-bottom: 4rem; }
+}
