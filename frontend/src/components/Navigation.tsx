@@ -2,17 +2,16 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X } from 'lucide-react';
-
+import { Menu, X, Home, User, Briefcase, Grid, Zap, Mail } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 
 const NAV_LINKS = [
-  { name: 'Home', href: '#home' },
-  { name: 'About', href: '#about' },
-  { name: 'Services', href: '#services' },
-  { name: 'Portfolio', href: '#portfolio' },
-  { name: 'Skills', href: '#skills' },
-  { name: 'Contact', href: '#contact' },
+  { name: 'Home',      href: '#home',      Icon: Home },
+  { name: 'About',     href: '#about',     Icon: User },
+  { name: 'Services',  href: '#services',  Icon: Briefcase },
+  { name: 'Portfolio', href: '#portfolio', Icon: Grid },
+  { name: 'Skills',    href: '#skills',    Icon: Zap },
+  { name: 'Contact',   href: '#contact',   Icon: Mail },
 ];
 
 export function Navigation({ settings }: { settings?: any }) {
@@ -116,36 +115,68 @@ export function Navigation({ settings }: { settings?: any }) {
         </div>
       </motion.header>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile Bottom-Sheet Menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, x: '100%' }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 z-40 glass-panel bg-dark-900/95 flex flex-col items-center justify-center"
+            key="mobile-nav-wrapper"
+            className="fixed inset-0 z-40"
           >
-            <nav className="flex flex-col items-center gap-8">
-              {NAV_LINKS.map((link, i) => (
-                <motion.a
-                  key={link.name}
-                  href={link.href}
-                  onClick={(e) => scrollTo(e, link.href)}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                  className={twMerge(
-                    'text-2xl font-display font-medium',
-                    activeSection === link.href.substring(1)
-                      ? 'text-neon-blue text-glow-blue'
-                      : 'text-white/70'
-                  )}
-                >
-                  {link.name}
-                </motion.a>
-              ))}
-            </nav>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+            {/* Bottom Sheet */}
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+              className="absolute bottom-0 left-0 right-0 z-50 bg-[#0d0d14]/95 backdrop-blur-2xl border-t border-white/10 rounded-t-3xl pb-safe"
+            >
+              {/* Pull bar */}
+              <div className="flex justify-center pt-3 pb-2">
+                <div className="w-10 h-1 rounded-full bg-white/20" />
+              </div>
+
+              {/* Site name */}
+              <div className="px-6 pb-4 border-b border-white/8">
+                <p className="text-xs text-white/40 uppercase tracking-widest">Navigation</p>
+              </div>
+
+              <nav className="px-4 py-3 grid grid-cols-3 gap-2">
+                {NAV_LINKS.map((link, i) => {
+                  const isActive = activeSection === link.href.substring(1);
+                  const { Icon } = link;
+                  return (
+                    <motion.a
+                      key={link.name}
+                      href={link.href}
+                      onClick={(e) => scrollTo(e, link.href)}
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                      className={twMerge(
+                        'flex flex-col items-center gap-2 py-3 px-2 rounded-2xl transition-all',
+                        isActive
+                          ? 'bg-neon-blue/15 text-neon-blue'
+                          : 'text-white/60 hover:text-white hover:bg-white/5'
+                      )}
+                    >
+                      <Icon size={20} />
+                      <span className="text-xs font-medium">{link.name}</span>
+                    </motion.a>
+                  );
+                })}
+              </nav>
+
+              {/* Bottom safe area padding for notch phones */}
+              <div className="h-6" />
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

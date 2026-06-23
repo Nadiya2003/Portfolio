@@ -33,6 +33,7 @@ export default function HeroPage() {
 
   const { register, handleSubmit, reset, setValue, watch } = useForm();
   const stats = watch("stats") || [];
+  const introLines = watch("introLines") || [];
 
   useEffect(() => {
     api.get("/hero").then((res) => {
@@ -41,10 +42,7 @@ export default function HeroPage() {
       reset({
         fullName: d.fullName, title: d.title, subtitle: d.subtitle, bio: d.bio,
         ctaText: d.ctaText, ctaSecondaryText: d.ctaSecondaryText, stats: d.stats || [],
-        "socials.email": d.socials?.email, "socials.phone": d.socials?.phone,
-        "socials.whatsapp": d.socials?.whatsapp, "socials.linkedin": d.socials?.linkedin,
-        "socials.github": d.socials?.github, "socials.behance": d.socials?.behance,
-        "socials.dribbble": d.socials?.dribbble, "socials.instagram": d.socials?.instagram,
+        introLines: d.introLines || ["HELLO", "I'M NADEESHA", "GRAPHIC DESIGNER & DEVELOPER"],
       });
     }).finally(() => setLoading(false));
   }, [reset]);
@@ -54,7 +52,7 @@ export default function HeroPage() {
     try {
       const formData = new FormData();
       Object.entries(data).forEach(([k, v]) => {
-        if (k === "stats" || k === "socials") formData.append(k, JSON.stringify(v));
+        if (k === "stats" || k === "introLines") formData.append(k, JSON.stringify(v));
         else formData.append(k, String(v ?? ""));
       });
       if (heroImageFile) formData.append("heroImage", heroImageFile);
@@ -67,6 +65,12 @@ export default function HeroPage() {
 
   const addStat = () => setValue("stats", [...stats, { label: "", value: 0, suffix: "" }]);
   const removeStat = (i: number) => setValue("stats", stats.filter((_: unknown, idx: number) => idx !== i));
+
+  const addIntroLine = () => {
+    if (introLines.length < 5) setValue("introLines", [...introLines, ""]);
+  };
+  const removeIntroLine = (i: number) => setValue("introLines", introLines.filter((_: unknown, idx: number) => idx !== i));
+
 
   if (loading) return <div className="space-y-4">{[...Array(4)].map((_, i) => <div key={i} className="skeleton h-20 rounded-2xl" />)}</div>;
 
@@ -112,21 +116,21 @@ export default function HeroPage() {
             </div>
           </div>
 
-          {/* Social Links */}
-          <div className="glass rounded-2xl p-6 space-y-4">
-            <h3 className="text-sm font-semibold text-white">Social Links</h3>
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { key: "socials.email", label: "Email", ph: "hello@you.com" },
-                { key: "socials.phone", label: "Phone", ph: "+1 555 000 0000" },
-                { key: "socials.whatsapp", label: "WhatsApp", ph: "+15550000000" },
-                { key: "socials.linkedin", label: "LinkedIn URL", ph: "https://linkedin.com/in/..." },
-                { key: "socials.github", label: "GitHub URL", ph: "https://github.com/..." },
-                { key: "socials.behance", label: "Behance URL", ph: "https://behance.net/..." },
-                { key: "socials.dribbble", label: "Dribbble URL", ph: "https://dribbble.com/..." },
-                { key: "socials.instagram", label: "Instagram URL", ph: "https://instagram.com/..." },
-              ].map((s) => (
-                <Field key={s.key} label={s.label}><Input {...register(s.key)} placeholder={s.ph} /></Field>
+          {/* Intro Sequence */}
+          <div className="glass rounded-2xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-white">Intro Sequence (Animated Text)</h3>
+              <button type="button" onClick={addIntroLine} disabled={introLines.length >= 5} className="flex items-center gap-1.5 text-xs text-[#8B5CF6] hover:text-[#A78BFA] transition-colors disabled:opacity-50">
+                <Plus size={13} /> Add Line
+              </button>
+            </div>
+            <div className="space-y-3">
+              {introLines.map((_: unknown, i: number) => (
+                <div key={i} className="flex items-center gap-3">
+                  <GripVertical size={14} className="text-[#3f3f46] flex-shrink-0" />
+                  <Input {...register(`introLines.${i}`)} placeholder={`Line ${i + 1}`} className="flex-1" />
+                  <button type="button" onClick={() => removeIntroLine(i)} className="text-red-400 hover:text-red-300 transition-colors flex-shrink-0"><Trash2 size={14} /></button>
+                </div>
               ))}
             </div>
           </div>

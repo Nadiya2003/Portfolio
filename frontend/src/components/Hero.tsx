@@ -21,7 +21,7 @@ export function Hero({ data }: { data?: any }) {
   return (
     <section
       id="home"
-      className="relative min-h-screen flex items-center pt-20 pb-12 overflow-hidden"
+      className="relative min-h-[100dvh] flex items-center pt-20 pb-12 overflow-hidden"
     >
       {/* Floating 3D-ish Background Elements */}
       <div className="absolute inset-0 pointer-events-none">
@@ -42,17 +42,17 @@ export function Hero({ data }: { data?: any }) {
         />
       </div>
 
-      <div className="container mx-auto px-6 md:px-12 relative z-10">
-        <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
-          <div className={`max-w-4xl ${hasImage ? 'lg:w-3/5' : 'w-full'}`}>
+      <div className="container mx-auto px-5 md:px-12 relative z-10">
+        <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-20">
+          <div className={`w-full max-w-4xl ${hasImage ? 'lg:w-3/5' : 'w-full'}`}>
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-panel border-neon-purple/30 mb-8">
-                <span className="w-2 h-2 rounded-full bg-neon-purple animate-pulse shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
-                <span className="text-sm font-medium text-white/80">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass-panel border-neon-purple/30 mb-5 md:mb-8">
+                <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-neon-purple animate-pulse shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
+                <span className="text-xs md:text-sm font-medium text-white/80">
                   Available for new projects
                 </span>
               </div>
@@ -62,7 +62,7 @@ export function Hero({ data }: { data?: any }) {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="text-5xl md:text-7xl lg:text-8xl font-display font-bold leading-[1.1] tracking-tight mb-6"
+              className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-display font-bold leading-[1.1] tracking-tight mb-4 md:mb-6"
             >
               {data?.title || 'Designing Experiences.'} <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-blue via-neon-cyan to-white">
@@ -74,7 +74,7 @@ export function Hero({ data }: { data?: any }) {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="text-lg md:text-xl text-white/60 max-w-2xl mb-10 leading-relaxed text-justify md:text-left"
+              className="text-base md:text-xl text-white/60 max-w-2xl mb-8 md:mb-10 leading-relaxed text-justify"
             >
               {data?.bio || "I bridge the gap between aesthetics and engineering."}
             </motion.p>
@@ -118,7 +118,7 @@ export function Hero({ data }: { data?: any }) {
               transition={{ duration: 1, delay: 0.4 }}
               className="lg:w-2/5 w-full flex justify-center relative"
             >
-              <div className="relative w-[300px] h-[400px] md:w-[400px] md:h-[500px]">
+              <div className="relative w-[250px] h-[320px] sm:w-[300px] sm:h-[400px] md:w-[380px] md:h-[480px]">
                 <div className="absolute inset-0 bg-gradient-to-tr from-neon-blue to-neon-purple rounded-[2rem] transform rotate-3 opacity-30 blur-xl" />
                 <div className="absolute inset-0 bg-dark-800 rounded-[2rem] transform -rotate-3 border border-white/10 overflow-hidden shadow-2xl">
                   {/* eslint-disable-next-line @next/next/no-img-element */}

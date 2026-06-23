@@ -29,10 +29,10 @@ export const FloatingControls = () => {
 
   return (
     <>
-      {/* Side Contact Button */}
+      {/* Side Contact Button — hidden on mobile (use nav menu instead) */}
       <motion.button
         onClick={scrollToContact}
-        className="fixed right-6 bottom-8 z-50 w-12 h-12 rounded-full bg-[#3b82f6] flex items-center justify-center text-white shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] transition-all group"
+        className="hidden sm:flex fixed right-6 bottom-8 z-50 w-12 h-12 rounded-full bg-[#3b82f6] items-center justify-center text-white shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] transition-all group"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
       >
@@ -46,15 +46,16 @@ export const FloatingControls = () => {
       <AnimatePresence>
         {showScrollTop && (
           <motion.button
+            key="scroll-top-btn"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             onClick={scrollToTop}
-            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 w-12 h-12 rounded-full glass-panel flex items-center justify-center text-white hover:bg-white/10 transition-colors shadow-lg"
+            className="fixed bottom-6 right-6 sm:bottom-8 sm:left-1/2 sm:-translate-x-1/2 sm:right-auto z-50 w-11 h-11 sm:w-12 sm:h-12 rounded-full glass-panel flex items-center justify-center text-white hover:bg-white/10 transition-colors shadow-lg"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
           >
-            <ArrowUp size={24} className="text-[#3b82f6]" />
+            <ArrowUp size={22} className="text-[#3b82f6]" />
           </motion.button>
         )}
       </AnimatePresence>

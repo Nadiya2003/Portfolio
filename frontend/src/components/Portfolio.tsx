@@ -289,13 +289,14 @@ export function Portfolio({ projects }: { projects?: any[] }) {
       <AnimatePresence>
         {selectedProject && (
           <motion.div
+            key="portfolio-modal"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-6 md:p-12"
           >
             <div
-              className="absolute inset-0 bg-dark-900/90 backdrop-blur-xl"
+              className="absolute inset-0 bg-black/40 backdrop-blur-2xl"
               onClick={() => setSelectedProject(null)}
             />
 
@@ -303,7 +304,7 @@ export function Portfolio({ projects }: { projects?: any[] }) {
               initial={{ opacity: 0, y: 60, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 40, scale: 0.97 }}
-              className="relative w-full max-w-5xl max-h-[94dvh] sm:max-h-[90vh] overflow-y-auto glass-panel rounded-t-3xl sm:rounded-2xl border-neon-blue/30 shadow-[0_0_50px_rgba(59,130,246,0.15)] no-scrollbar"
+              className="relative w-full max-w-5xl max-h-[94dvh] sm:max-h-[90vh] overflow-y-auto bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-t-3xl sm:rounded-2xl shadow-[0_0_50px_rgba(59,130,246,0.15)] no-scrollbar"
             >
               {/* Close button */}
               <button

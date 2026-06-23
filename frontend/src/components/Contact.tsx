@@ -11,6 +11,11 @@ import {
   Linkedin,
   MessageCircle,
   Dribbble,
+  Facebook,
+  Instagram,
+  Twitter,
+  Youtube,
+  Globe,
 } from 'lucide-react';
 import { SectionHeading } from './ui/SectionHeading';
 import { GlassCard } from './ui/GlassCard';
@@ -71,9 +76,24 @@ export function Contact({ settings, hero }: { settings?: any, hero?: any }) {
     setFormState({ ...formState, [e.target.name]: e.target.value });
   };
 
-  const email = hero?.socials?.email || settings?.email || 'hello@example.com';
-  const phone = hero?.socials?.phone || settings?.phone || '+1 234 567 890';
-  const whatsapp = hero?.socials?.whatsapp || settings?.whatsapp || phone;
+  const email = settings?.contact?.email || 'hello@example.com';
+  const phone = settings?.contact?.phone || '+1 234 567 890';
+  const whatsapp = settings?.contact?.whatsapp || phone;
+  const mapLink = settings?.contact?.mapUrl || settings?.contact?.mapLink || '';
+  const socials = settings?.socials || {};
+
+  const getSocialIcon = (key: string) => {
+    switch (key) {
+      case 'facebook': return <Facebook size={24} />;
+      case 'instagram': return <Instagram size={24} />;
+      case 'linkedin': return <Linkedin size={24} />;
+      case 'twitter': return <Twitter size={24} />;
+      case 'github': return <Github size={24} />;
+      case 'youtube': return <Youtube size={24} />;
+      case 'dribbble': return <Dribbble size={24} />;
+      default: return <Globe size={24} />;
+    }
+  };
 
   return (
     <section id="contact" className="py-24 relative">
@@ -94,18 +114,18 @@ export function Contact({ settings, hero }: { settings?: any, hero?: any }) {
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <GlassCard
-                className="p-6 flex flex-col items-center text-center gap-4"
+                className="p-5 md:p-6 flex flex-row sm:flex-col items-center sm:text-center gap-4"
                 hoverEffect
                 glowColor="blue"
               >
-                <div className="w-12 h-12 rounded-full bg-neon-blue/10 flex items-center justify-center text-neon-blue">
-                  <Mail size={24} />
+                <div className="w-11 h-11 md:w-12 md:h-12 rounded-full bg-neon-blue/10 flex items-center justify-center text-neon-blue flex-shrink-0">
+                  <Mail size={22} />
                 </div>
-                <div>
-                  <h4 className="text-white font-medium mb-1">Email</h4>
+                <div className="text-left sm:text-center">
+                  <h4 className="text-white font-medium mb-0.5 text-sm md:text-base">Email</h4>
                   <a
                     href={`mailto:${email}`}
-                    className="text-white/60 hover:text-neon-blue transition-colors text-sm"
+                    className="text-white/60 hover:text-neon-blue transition-colors text-xs md:text-sm break-all"
                   >
                     {email}
                   </a>
@@ -113,18 +133,20 @@ export function Contact({ settings, hero }: { settings?: any, hero?: any }) {
               </GlassCard>
 
               <GlassCard
-                className="p-6 flex flex-col items-center text-center gap-4"
+                className="p-5 md:p-6 flex flex-row sm:flex-col items-center sm:text-center gap-4"
                 hoverEffect
                 glowColor="purple"
               >
-                <div className="w-12 h-12 rounded-full bg-neon-purple/10 flex items-center justify-center text-neon-purple">
-                  <MessageCircle size={24} />
+                <div className="w-11 h-11 md:w-12 md:h-12 rounded-full bg-neon-purple/10 flex items-center justify-center text-neon-purple flex-shrink-0">
+                  <MessageCircle size={22} />
                 </div>
-                <div>
-                  <h4 className="text-white font-medium mb-1">WhatsApp</h4>
+                <div className="text-left sm:text-center">
+                  <h4 className="text-white font-medium mb-0.5 text-sm md:text-base">WhatsApp</h4>
                   <a
-                    href={`tel:${whatsapp}`}
-                    className="text-white/60 hover:text-neon-purple transition-colors text-sm"
+                    href={`https://wa.me/${whatsapp.replace(/[^0-9]/g, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white/60 hover:text-neon-purple transition-colors text-xs md:text-sm"
                   >
                     {phone}
                   </a>
@@ -133,57 +155,54 @@ export function Contact({ settings, hero }: { settings?: any, hero?: any }) {
             </div>
 
             {/* Social Links */}
-            <GlassCard className="p-6 flex justify-center gap-6">
-              {hero?.socials?.linkedin && (
-                <a
-                  href={hero.socials.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-white/50 hover:text-neon-blue transition-colors"
-                  aria-label="LinkedIn"
-                >
-                  <Linkedin size={24} />
-                </a>
-              )}
-              {hero?.socials?.github && (
-                <a
-                  href={hero.socials.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-white/50 hover:text-white transition-colors"
-                  aria-label="GitHub"
-                >
-                  <Github size={24} />
-                </a>
-              )}
-              {hero?.socials?.dribbble && (
-                <a
-                  href={hero.socials.dribbble}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-white/50 hover:text-neon-cyan transition-colors"
-                  aria-label="Dribbble"
-                >
-                  <Dribbble size={24} />
-                </a>
-              )}
+            <GlassCard className="p-6 flex flex-wrap justify-center gap-6">
+              {Object.entries(socials).map(([key, url]) => {
+                if (!url) return null;
+                return (
+                  <a
+                    key={key}
+                    href={url as string}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white/50 hover:text-neon-cyan transition-colors"
+                    aria-label={key}
+                  >
+                    {getSocialIcon(key)}
+                  </a>
+                );
+              })}
             </GlassCard>
 
             {/* Stylized Dark Map Placeholder */}
             <GlassCard className="h-64 relative overflow-hidden p-0">
               <div className="absolute inset-0 bg-[#0a0a0f] opacity-80 z-10 mix-blend-multiply" />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=2074&auto=format&fit=crop"
-                alt="Map location"
-                className="w-full h-full object-cover grayscale contrast-125"
-              />
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center">
-                <div className="w-12 h-12 rounded-full bg-neon-blue/20 flex items-center justify-center relative">
-                  <div className="absolute inset-0 rounded-full border border-neon-blue animate-ping opacity-75" />
-                  <MapPin className="text-neon-blue" size={24} />
-                </div>
-              </div>
+              {mapLink ? (
+                <iframe
+                  src={mapLink}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0, filter: 'grayscale(1) contrast(1.2)' }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="absolute inset-0 z-20 opacity-80"
+                />
+              ) : (
+                <>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=2074&auto=format&fit=crop"
+                    alt="Map location"
+                    className="w-full h-full object-cover grayscale contrast-125"
+                  />
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center pointer-events-none">
+                    <div className="w-12 h-12 rounded-full bg-neon-blue/20 flex items-center justify-center relative">
+                      <div className="absolute inset-0 rounded-full border border-neon-blue animate-ping opacity-75" />
+                      <MapPin className="text-neon-blue" size={24} />
+                    </div>
+                  </div>
+                </>
+              )}
             </GlassCard>
           </motion.div>
 
@@ -193,7 +212,7 @@ export function Contact({ settings, hero }: { settings?: any, hero?: any }) {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
           >
-            <GlassCard className="p-8 md:p-10">
+            <GlassCard className="p-6 md:p-10">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="relative group">
