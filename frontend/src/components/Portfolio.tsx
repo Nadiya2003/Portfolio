@@ -5,8 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, ExternalLink, ChevronLeft, ChevronRight, FileText } from 'lucide-react';
 import { SectionHeading } from './ui/SectionHeading';
 import { GlassCard } from './ui/GlassCard';
-import { BeforeAfterSlider } from './ui/BeforeAfterSlider';
 import { twMerge } from 'tailwind-merge';
+
 
 // Section-level category labels (matches _sectionType tags set in page.tsx)
 const SECTION_CATEGORIES = [
@@ -20,7 +20,7 @@ const SECTION_CATEGORIES = [
 ];
 
 // Which categories should open the live URL directly on card click
-const LINK_CATEGORIES = new Set(['Web Development', 'UI/UX Design', 'Projects']);
+const LINK_CATEGORIES = new Set(['UI/UX Design', 'Projects']);
 
 // Which categories need full-image lightbox (object-contain, no crop)
 const FULLIMAGE_CATEGORIES = new Set(['Graphic Design', 'Pencil Arts', 'Video Editing']);
@@ -121,6 +121,69 @@ function MobileCarousel({ items, renderItem }: { items: any[]; renderItem: (item
   );
 }
 
+// ─── Image Carousel (used inside modal) ─────────────────────────────────────
+function ImageCarousel({ images }: { images: string[] }) {
+  const [idx, setIdx] = useState(0);
+  if (!images.length) return null;
+  const prev = () => setIdx((i) => Math.max(0, i - 1));
+  const next = () => setIdx((i) => Math.min(images.length - 1, i + 1));
+  return (
+    <div className="relative w-full bg-black rounded-t-2xl sm:rounded-xl overflow-hidden" style={{ maxHeight: '60vh' }}>
+      {/* Main image */}
+      <div className="flex items-center justify-center" style={{ height: '55vh', maxHeight: '55vh', background: '#000' }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          key={idx}
+          src={images[idx]}
+          alt={`Image ${idx + 1}`}
+          className="max-w-full max-h-full object-contain select-none"
+          style={{ maxHeight: '55vh' }}
+          draggable={false}
+        />
+      </div>
+
+      {/* Left arrow */}
+      {idx > 0 && (
+        <button
+          onClick={prev}
+          className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-black/60 backdrop-blur flex items-center justify-center text-white hover:bg-black/80 transition-colors"
+        >
+          <ChevronLeft size={20} />
+        </button>
+      )}
+      {/* Right arrow */}
+      {idx < images.length - 1 && (
+        <button
+          onClick={next}
+          className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-black/60 backdrop-blur flex items-center justify-center text-white hover:bg-black/80 transition-colors"
+        >
+          <ChevronRight size={20} />
+        </button>
+      )}
+
+      {/* Dot indicators + counter */}
+      {images.length > 1 && (
+        <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-1.5">
+          {images.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setIdx(i)}
+              className={`rounded-full transition-all duration-200 ${i === idx ? 'w-5 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/40'}`}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Counter badge */}
+      {images.length > 1 && (
+        <span className="absolute top-3 right-3 px-2 py-0.5 bg-black/60 backdrop-blur rounded-full text-xs text-white/70">
+          {idx + 1} / {images.length}
+        </span>
+      )}
+    </div>
+  );
+}
+
 // ─── Main Component ──────────────────────────────────────────────────────────
 export function Portfolio({ projects }: { projects?: any[] }) {
   const [activeFilter, setActiveFilter] = useState('All');
@@ -162,7 +225,9 @@ export function Portfolio({ projects }: { projects?: any[] }) {
     const isLinkType = LINK_CATEGORIES.has(project._sectionType);
     const overlayLabel = isLinkType
       ? <><ExternalLink size={14} /> Visit Website</>
-      : <><ExternalLink size={14} /> View Full Image</>;
+      : project._sectionType === 'Web Development'
+        ? <><ExternalLink size={14} /> View Details</>
+        : <><ExternalLink size={14} /> View Full Image</>;
 
     return (
       <GlassCard
@@ -332,38 +397,16 @@ export function Portfolio({ projects }: { projects?: any[] }) {
               </div>
 
               <div className="p-1">
-                {/* Image area */}
-                <div
-                  className={twMerge(
-                    'w-full rounded-t-2xl sm:rounded-xl overflow-hidden relative bg-dark-800',
-                    FULLIMAGE_CATEGORIES.has(selectedProject._sectionType)
-                      ? 'aspect-auto max-h-[60vh] flex items-center justify-center'
-                      : 'aspect-video md:aspect-[21/9]'
-                  )}
-                >
-                  {selectedProject.beforeImage && selectedProject.image ? (
-                    <BeforeAfterSlider
-                      beforeImage={selectedProject.beforeImage}
-                      afterImage={selectedProject.image}
-                    />
-                  ) : selectedProject.image ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={selectedProject.image}
-                      alt={selectedProject.title}
-                      className={twMerge(
-                        'w-full',
-                        FULLIMAGE_CATEGORIES.has(selectedProject._sectionType)
-                          ? 'max-h-[60vh] object-contain'
-                          : 'h-full object-cover'
-                      )}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-white/20 py-20">
-                      No Image
-                    </div>
-                  )}
-                </div>
+                {/* All images as compact carousel */}
+                {(() => {
+                  const imgs: string[] = [];
+                  if (selectedProject.image) imgs.push(selectedProject.image);
+                  if (selectedProject.beforeImage) imgs.push(selectedProject.beforeImage);
+                  (selectedProject.gallery || []).forEach((g: any) => g?.url && imgs.push(g.url));
+                  (selectedProject.screenshots || []).forEach((g: any) => g?.url && imgs.push(g.url));
+                  (selectedProject.artworkImages || []).forEach((g: any) => g?.url && imgs.push(g.url));
+                  return imgs.length > 0 ? <ImageCarousel images={imgs} /> : null;
+                })()}
 
                 {/* Modal content */}
                 <div className="p-6 md:p-10">
@@ -421,7 +464,13 @@ export function Portfolio({ projects }: { projects?: any[] }) {
                       )}
                       {selectedProject.pdfUrl && (
                         <a
-                          href={selectedProject.pdfUrl}
+                          href={(() => {
+                            const url: string = selectedProject.pdfUrl;
+                            if (url.includes('res.cloudinary.com') && !url.includes('fl_inline')) {
+                              return url.replace('/upload/', '/upload/fl_inline/');
+                            }
+                            return url;
+                          })()}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-pink-500/10 border border-pink-500/30 text-pink-400 hover:bg-pink-500/20 transition-colors text-sm font-medium"
@@ -432,33 +481,6 @@ export function Portfolio({ projects }: { projects?: any[] }) {
                     </div>
                   )}
                 </div>
-
-                {/* Additional Gallery Images */}
-                {(selectedProject.gallery?.length > 0 || selectedProject.screenshots?.length > 0 || selectedProject.artworkImages?.length > 0) && (
-                  <div className="px-6 pb-10 md:px-10">
-                    <h3 className="text-xl font-bold text-white mb-6">Gallery</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {(selectedProject.gallery || []).map((img: any, idx: number) => (
-                        <div key={`gal-${idx}`} className="rounded-xl overflow-hidden bg-white/5 border border-white/10">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={img.url} alt="Gallery" className="w-full h-auto object-cover hover:scale-105 transition-transform duration-500" />
-                        </div>
-                      ))}
-                      {(selectedProject.screenshots || []).map((img: any, idx: number) => (
-                        <div key={`scr-${idx}`} className="rounded-xl overflow-hidden bg-white/5 border border-white/10">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={img.url} alt="Screenshot" className="w-full h-auto object-cover hover:scale-105 transition-transform duration-500" />
-                        </div>
-                      ))}
-                      {(selectedProject.artworkImages || []).map((img: any, idx: number) => (
-                        <div key={`art-${idx}`} className="rounded-xl overflow-hidden bg-white/5 border border-white/10">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={img.url} alt="Artwork" className="w-full h-auto object-cover hover:scale-105 transition-transform duration-500" />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
             </motion.div>
           </motion.div>
