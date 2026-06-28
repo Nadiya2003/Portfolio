@@ -40,11 +40,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     setMounted(true);
     if (!token) {
       router.replace("/login");
-    } else if (!admin) {
+    } else {
       fetchMe();
       fetchSettings();
     }
-  }, [token, admin, fetchMe, fetchSettings, router]);
+  }, [token, fetchMe, fetchSettings, router]);
 
   if (!mounted || !token) return null;
 

@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, ExternalLink, ChevronLeft, ChevronRight, FileText } from 'lucide-react';
 import { SectionHeading } from './ui/SectionHeading';
 import { GlassCard } from './ui/GlassCard';
 import { BeforeAfterSlider } from './ui/BeforeAfterSlider';
@@ -178,6 +178,17 @@ export function Portfolio({ projects }: { projects?: any[] }) {
               src={project.image}
               alt={project.title}
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            />
+          ) : isLinkType && project.liveUrl ? (
+            // Auto-load website screenshot for web/UI projects with no thumbnail
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={`https://image.thum.io/get/width/600/crop/450/${encodeURIComponent(
+                project.liveUrl.startsWith('http') ? project.liveUrl : `https://${project.liveUrl}`
+              )}`}
+              alt={project.title}
+              className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-110"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-white/20">
@@ -386,7 +397,7 @@ export function Portfolio({ projects }: { projects?: any[] }) {
                   )}
 
                   {/* Action buttons */}
-                  {(selectedProject.liveUrl || selectedProject.githubUrl) && (
+                  {(selectedProject.liveUrl || selectedProject.githubUrl || selectedProject.pdfUrl) && (
                     <div className="flex flex-wrap gap-3 mt-6">
                       {selectedProject.liveUrl && (
                         <a
@@ -408,9 +419,46 @@ export function Portfolio({ projects }: { projects?: any[] }) {
                           GitHub
                         </a>
                       )}
+                      {selectedProject.pdfUrl && (
+                        <a
+                          href={selectedProject.pdfUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-pink-500/10 border border-pink-500/30 text-pink-400 hover:bg-pink-500/20 transition-colors text-sm font-medium"
+                        >
+                          <FileText size={14} /> View PDF
+                        </a>
+                      )}
                     </div>
                   )}
                 </div>
+
+                {/* Additional Gallery Images */}
+                {(selectedProject.gallery?.length > 0 || selectedProject.screenshots?.length > 0 || selectedProject.artworkImages?.length > 0) && (
+                  <div className="px-6 pb-10 md:px-10">
+                    <h3 className="text-xl font-bold text-white mb-6">Gallery</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {(selectedProject.gallery || []).map((img: any, idx: number) => (
+                        <div key={`gal-${idx}`} className="rounded-xl overflow-hidden bg-white/5 border border-white/10">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={img.url} alt="Gallery" className="w-full h-auto object-cover hover:scale-105 transition-transform duration-500" />
+                        </div>
+                      ))}
+                      {(selectedProject.screenshots || []).map((img: any, idx: number) => (
+                        <div key={`scr-${idx}`} className="rounded-xl overflow-hidden bg-white/5 border border-white/10">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={img.url} alt="Screenshot" className="w-full h-auto object-cover hover:scale-105 transition-transform duration-500" />
+                        </div>
+                      ))}
+                      {(selectedProject.artworkImages || []).map((img: any, idx: number) => (
+                        <div key={`art-${idx}`} className="rounded-xl overflow-hidden bg-white/5 border border-white/10">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={img.url} alt="Artwork" className="w-full h-auto object-cover hover:scale-105 transition-transform duration-500" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
           </motion.div>

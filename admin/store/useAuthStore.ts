@@ -21,7 +21,7 @@ interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-  admin: null,
+  admin: typeof window !== "undefined" && localStorage.getItem("admin_user") ? (() => { try { return JSON.parse(localStorage.getItem("admin_user") as string); } catch { return null; } })() : null,
   token: typeof window !== "undefined" ? localStorage.getItem("admin_token") : null,
   isLoading: false,
 
@@ -44,8 +44,13 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const res = await api.get("/auth/me");
       set({ admin: res.data.admin });
-    } catch {
-      set({ token: null, admin: null });
+      localStorage.setItem("admin_user", JSON.stringify(res.data.admin));
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        set({ token: null, admin: null });
+        localStorage.removeItem("admin_token");
+        localStorage.removeItem("admin_user");
+      }
     }
   },
 

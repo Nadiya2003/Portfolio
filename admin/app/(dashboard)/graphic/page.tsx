@@ -19,7 +19,7 @@ export default function GraphicDesignPage() {
         title="Graphic Designs"
         categories={["Logo Design", "Flyer Design", "Banner Design", "Branding", "Other"]}
         fields={[{ key: "category", label: "Category" }]}
-        FormComponent={(props) => <GenericForm {...props} endpoint="graphic" fields={fields as any} hasThumbnail hasBeforeImage hasTags hasGallery />}
+        FormComponent={(props) => <GenericForm {...props} endpoint="graphic" fields={fields as any} hasThumbnail hasBeforeImage hasTags hasGallery hasPdf />}
       />
     </div>
   );
