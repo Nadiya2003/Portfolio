@@ -14,6 +14,8 @@ const graphicDesignSchema = new mongoose.Schema(
     beforeImage: { type: String, default: '' },
     beforeImagePublicId: { type: String, default: '' },
     gallery: [{ url: String, publicId: String }],
+    pdfUrl: { type: String, default: '' },
+    pdfPublicId: { type: String, default: '' },
     clientName: { type: String, default: '' },
     tags: [{ type: String }],
     status: { type: String, enum: ['published', 'draft', 'archived'], default: 'published' },

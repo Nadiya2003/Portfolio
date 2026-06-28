@@ -75,6 +75,12 @@ const createCrudController = (Model) => {
         data.videoPublicId  = req.files.video[0].filename;
       }
 
+      // PDF file
+      if (req.files?.pdf?.[0]) {
+        data.pdfUrl       = req.files.pdf[0].path;
+        data.pdfPublicId  = req.files.pdf[0].filename;
+      }
+
       const item = await Model.create(data);
       res.status(201).json({ success: true, data: item });
     } catch (err) {
@@ -89,18 +95,26 @@ const createCrudController = (Model) => {
       const item = await Model.findById(req.params.id);
       if (!item) return res.status(404).json({ success: false, message: 'Not found.' });
 
-      // Replace thumbnail
+      // Replace or remove thumbnail
       if (req.files?.thumbnail?.[0]) {
         await destroyAsset(item.thumbnailPublicId);
         item.thumbnail         = req.files.thumbnail[0].path;
         item.thumbnailPublicId = req.files.thumbnail[0].filename;
+      } else if (req.body.removeThumbnail === 'true') {
+        await destroyAsset(item.thumbnailPublicId);
+        item.thumbnail = '';
+        item.thumbnailPublicId = '';
       }
 
-      // Replace beforeImage
+      // Replace or remove beforeImage
       if (req.files?.beforeImage?.[0]) {
         await destroyAsset(item.beforeImagePublicId);
         item.beforeImage          = req.files.beforeImage[0].path;
         item.beforeImagePublicId  = req.files.beforeImage[0].filename;
+      } else if (req.body.removeBeforeImage === 'true') {
+        await destroyAsset(item.beforeImagePublicId);
+        item.beforeImage = '';
+        item.beforeImagePublicId = '';
       }
 
       // Replace video
@@ -109,6 +123,33 @@ const createCrudController = (Model) => {
         item.videoUrl      = req.files.video[0].path;
         item.videoPublicId = req.files.video[0].filename;
       }
+
+      // Replace PDF
+      if (req.files?.pdf?.[0]) {
+        await destroyAsset(item.pdfPublicId, 'raw');
+        item.pdfUrl       = req.files.pdf[0].path;
+        item.pdfPublicId  = req.files.pdf[0].filename;
+      }
+
+      // Handle removal of existing multi-file images
+      const handleExistingArray = async (field, bodyKey) => {
+        if (req.body[bodyKey]) {
+          try {
+            const retained = JSON.parse(req.body[bodyKey]);
+            const removed = (item[field] || []).filter(img => !retained.find(r => r.publicId === img.publicId));
+            for (const img of removed) {
+              await destroyAsset(img.publicId);
+            }
+            item[field] = retained;
+          } catch (e) {
+            console.error(`Error parsing ${bodyKey}:`, e);
+          }
+        }
+      };
+
+      await handleExistingArray('gallery', 'existingGallery');
+      await handleExistingArray('screenshots', 'existingScreenshots');
+      await handleExistingArray('artworkImages', 'existingArtworkImages');
 
       // Append to multi-file arrays
       if (req.files?.gallery?.length) {
@@ -127,7 +168,7 @@ const createCrudController = (Model) => {
       // Merge scalar body fields
       const bodyFields = { ...req.body };
       Object.keys(bodyFields).forEach((k) => {
-        if (!['_id', '__v', 'createdAt', 'updatedAt'].includes(k)) {
+        if (!['_id', '__v', 'createdAt', 'updatedAt', 'existingGallery', 'existingScreenshots', 'existingArtworkImages', 'removeThumbnail', 'removeBeforeImage'].includes(k)) {
           item[k] = bodyFields[k];
         }
       });
@@ -150,6 +191,7 @@ const createCrudController = (Model) => {
       await destroyAsset(item.thumbnailPublicId);
       await destroyAsset(item.beforeImagePublicId);
       await destroyAsset(item.videoPublicId, 'video');
+      await destroyAsset(item.pdfPublicId, 'raw');
       for (const img of [...(item.gallery || []), ...(item.screenshots || []), ...(item.artworkImages || [])]) {
         await destroyAsset(img.publicId);
       }

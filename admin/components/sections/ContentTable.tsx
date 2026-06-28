@@ -49,6 +49,8 @@ export function ContentTable({ endpoint, categories, fields, FormComponent }: Co
       const res = await api.get(`/${endpoint}`, { params });
       setItems(res.data.data || []);
       setTotal(res.data.total || 0);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to load data");
     } finally { setLoading(false); }
   }, [endpoint, search, category, status]);
 
@@ -62,13 +64,19 @@ export function ContentTable({ endpoint, categories, fields, FormComponent }: Co
       setItems((p) => p.filter((i) => i._id !== deleteId));
       toast.success("Deleted successfully");
       setDeleteId(null);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to delete item");
     } finally { setDeleting(false); }
   };
 
   const handleToggleStatus = async (item: ContentItem) => {
-    await api.patch(`/${endpoint}/${item._id}/toggle-status`);
-    setItems((p) => p.map((i) => i._id === item._id ? { ...i, status: i.status === "published" ? "draft" : "published" } : i));
-    toast.success("Status updated");
+    try {
+      await api.patch(`/${endpoint}/${item._id}/toggle-status`);
+      setItems((p) => p.map((i) => i._id === item._id ? { ...i, status: i.status === "published" ? "draft" : "published" } : i));
+      toast.success("Status updated");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to update status");
+    }
   };
 
   return (

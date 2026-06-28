@@ -113,45 +113,53 @@ export function Contact({ settings, hero }: { settings?: any, hero?: any }) {
             className="space-y-8"
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <GlassCard
-                className="p-5 md:p-6 flex flex-row sm:flex-col items-center sm:text-center gap-4"
-                hoverEffect
-                glowColor="blue"
+              <a
+                href={`mailto:${email}`}
+                className="block"
               >
-                <div className="w-11 h-11 md:w-12 md:h-12 rounded-full bg-neon-blue/10 flex items-center justify-center text-neon-blue flex-shrink-0">
-                  <Mail size={22} />
-                </div>
-                <div className="text-left sm:text-center">
-                  <h4 className="text-white font-medium mb-0.5 text-sm md:text-base">Email</h4>
-                  <a
-                    href={`mailto:${email}`}
-                    className="text-white/60 hover:text-neon-blue transition-colors text-xs md:text-sm break-all"
-                  >
-                    {email}
-                  </a>
-                </div>
-              </GlassCard>
+                <GlassCard
+                  className="p-5 md:p-6 flex flex-row sm:flex-col items-center sm:text-center gap-4 cursor-pointer"
+                  hoverEffect
+                  glowColor="blue"
+                >
+                  <div className="w-11 h-11 md:w-12 md:h-12 rounded-full bg-neon-blue/10 flex items-center justify-center text-neon-blue flex-shrink-0">
+                    <Mail size={22} />
+                  </div>
+                  <div className="text-left sm:text-center">
+                    <h4 className="text-white font-medium mb-0.5 text-sm md:text-base">Email</h4>
+                    <span
+                      className="text-white/60 hover:text-neon-blue transition-colors text-xs md:text-sm break-all"
+                    >
+                      {email}
+                    </span>
+                  </div>
+                </GlassCard>
+              </a>
 
-              <GlassCard
-                className="p-5 md:p-6 flex flex-row sm:flex-col items-center sm:text-center gap-4"
-                hoverEffect
-                glowColor="purple"
+              <a
+                href={`https://wa.me/${whatsapp.replace(/[^0-9]/g, '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block"
               >
-                <div className="w-11 h-11 md:w-12 md:h-12 rounded-full bg-neon-purple/10 flex items-center justify-center text-neon-purple flex-shrink-0">
-                  <MessageCircle size={22} />
-                </div>
-                <div className="text-left sm:text-center">
-                  <h4 className="text-white font-medium mb-0.5 text-sm md:text-base">WhatsApp</h4>
-                  <a
-                    href={`https://wa.me/${whatsapp.replace(/[^0-9]/g, '')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-white/60 hover:text-neon-purple transition-colors text-xs md:text-sm"
-                  >
-                    {phone}
-                  </a>
-                </div>
-              </GlassCard>
+                <GlassCard
+                  className="p-5 md:p-6 flex flex-row sm:flex-col items-center sm:text-center gap-4 cursor-pointer"
+                  hoverEffect
+                  glowColor="purple"
+                >
+                  <div className="w-11 h-11 md:w-12 md:h-12 rounded-full bg-neon-purple/10 flex items-center justify-center text-neon-purple flex-shrink-0">
+                    <MessageCircle size={22} />
+                  </div>
+                  <div className="text-left sm:text-center">
+                    <h4 className="text-white font-medium mb-0.5 text-sm md:text-base">WhatsApp</h4>
+                    <span
+                      className="text-white/60 hover:text-neon-purple transition-colors text-xs md:text-sm"
+                    >
+                      {phone}
+                    </span>
+                  </div>
+                </GlassCard>
+              </a>
             </div>
 
             {/* Social Links */}

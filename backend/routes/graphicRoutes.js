@@ -10,6 +10,7 @@ const uploader = upload('graphic').fields([
   { name: 'thumbnail', maxCount: 1 },
   { name: 'beforeImage', maxCount: 1 },
   { name: 'gallery', maxCount: 30 },
+  { name: 'pdf', maxCount: 1 },
 ]);
 
 router.get('/', ctrl.getAll);
